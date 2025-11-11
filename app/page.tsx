@@ -2,84 +2,48 @@
 
 import { db } from "@/libs/firebase";
 import { useEffect, useState } from "react";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { filmsRef } from "@/libs/collections";
+import { getDocs, collection } from "firebase/firestore";
 import UploadFilm from "@/components/upload-film";
-
-export const filmSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-});
-
-export type FormFilmData = z.infer<typeof filmSchema>;
-
-type VideoItem = {
-  key: string;
-  size: number;
-  lastModified: string | null;
-};
+import { Film } from "@/type/film-type";
+import { Play } from "lucide-react";
 
 export default function Home() {
-  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [films, setFilms] = useState<Film[]>([]);
   const [listLoading, setListLoading] = useState(true);
-  const [videoLoading, setVideoLoading] = useState(false);
+  const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [videoList, setVideoList] = useState<any[]>([]);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormFilmData>({
-    resolver: zodResolver(filmSchema),
-  });
 
   useEffect(() => {
-    const fetchVideosFromFirestore = async () => {
+    const fetchFilmsFromFirestore = async () => {
       try {
         const response = await getDocs(collection(db, "films"));
-        setVideoList(response.docs.map((doc) => doc.data()));
-      } catch (error) {
-        console.error("Error fetching videos from Firestore:", error);
-      }
-    };
-    fetchVideosFromFirestore();
-  }, []);
+        const filmsData = response.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        })) as Film[];
+        setFilms(filmsData);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const res = await fetch("/api/videos", { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error(`list request failed (${res.status})`);
+        // Set first featured film or first film as default
+        const featured = filmsData.find((f) => f.featured) || filmsData[0];
+        if (featured) {
+          setSelectedFilm(featured);
         }
-        const data = await res.json();
-        setVideos(data.items ?? []);
-      } catch (err) {
-        console.error("videos fetch error", err);
-        setError("Failed to load video list.");
+      } catch (error) {
+        console.error("Error fetching films from Firestore:", error);
       } finally {
         setListLoading(false);
       }
     };
-
-    fetchVideos();
+    fetchFilmsFromFirestore();
   }, []);
 
-  const handleSelect = async (key: string) => {
-    setSelectedKey(key);
-    setVideoLoading(true);
-    setError(null);
+  const handleSelect = async (film: Film) => {
+    setSelectedFilm(film);
 
     try {
-      const res = await fetch(`/api/signed-url?key=${encodeURIComponent(key)}`);
+      const res = await fetch(
+        `/api/signed-url?key=${encodeURIComponent(film.key)}`
+      );
       if (!res.ok) {
         throw new Error(`signed url request failed (${res.status})`);
       }
@@ -88,100 +52,171 @@ export default function Home() {
     } catch (err) {
       console.error("signed url fetch error", err);
       setVideoUrl(null);
-      setError("Failed to load selected video.");
-    } finally {
-      setVideoLoading(false);
     }
   };
 
-  return (
-    <div className="flex min-h-screen flex-col gap-8 bg-zinc-50 p-8 font-sans dark:bg-black">
-      <header className="mx-auto max-w-5xl text-center">
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Film Society
-        </h1>
-      </header>
-      <UploadFilm />
+  const featuredFilm = films.find((f) => f.featured) || films[0];
 
-      <div>
-        Firestore videos:
-        <ul>
-          {videoList.map((video, index) => (
-            <div key={index}>
-              <li>{video.title}</li>
-              <li>{video.description}</li>
-            </div>
-          ))}
-        </ul>
+  if (listLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="text-white">Loading films...</div>
       </div>
+    );
+  }
 
-      {error && (
-        <div className="mx-auto w-full max-w-5xl rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="fixed top-0 z-50 w-full border-b border-zinc-200 bg-white px-8 py-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-red-600">NETFLIX</h1>
+          <UploadFilm />
+        </div>
+      </header>
+
+      {/* Featured Film Hero Section */}
+      {featuredFilm && (
+        <section className="relative min-h-screen w-full bg-white pt-24">
+          {/* Featured Content - Centered */}
+          <div className="relative z-10 flex flex-col items-center px-8 py-16 text-center md:px-16 lg:px-24">
+            <div className="max-w-5xl space-y-8">
+              {/* Mega Bold Red Title */}
+              <h2 className="text-7xl font-black text-red-600 md:text-8xl lg:text-9xl">
+                {featuredFilm.title.toUpperCase()}
+              </h2>
+
+              {/* Thumbnail Image */}
+              <div className="mx-auto w-full max-w-2xl">
+                <img
+                  src={`https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(
+                    featuredFilm.title
+                  )}`}
+                  alt={featuredFilm.title}
+                  className="w-full rounded-lg shadow-2xl"
+                />
+              </div>
+
+              {/* Metadata */}
+              <div className="flex items-center justify-center gap-4 text-sm text-zinc-800">
+                <span className="rounded bg-red-600 px-3 py-1 font-semibold text-white">
+                  {featuredFilm.rating || "NR"}
+                </span>
+                <span className="font-medium">
+                  {featuredFilm.releaseDate?.split("-")[0]}
+                </span>
+                <span className="font-medium">
+                  {featuredFilm.duration ? `${featuredFilm.duration} min` : ""}
+                </span>
+                <span className="font-medium">
+                  {featuredFilm.genre?.join(", ")}
+                </span>
+              </div>
+
+              {/* Description */}
+              <p className="mx-auto max-w-3xl text-lg leading-relaxed text-zinc-700 md:text-xl">
+                {featuredFilm.description}
+              </p>
+
+              {/* Actors/Actresses */}
+              {featuredFilm.actors && featuredFilm.actors.length > 0 && (
+                <div className="text-zinc-800">
+                  <h3 className="mb-2 text-xl font-bold">Starring</h3>
+                  <p className="text-lg text-zinc-600">
+                    {featuredFilm.actors.join(", ")}
+                  </p>
+                </div>
+              )}
+
+              {/* Director */}
+              {featuredFilm.director && (
+                <div className="text-zinc-800">
+                  <span className="font-semibold">Director: </span>
+                  <span className="text-zinc-600">{featuredFilm.director}</span>
+                </div>
+              )}
+
+              {/* Play Button */}
+              <div className="flex justify-center gap-3 pt-4">
+                <button
+                  onClick={() => handleSelect(featuredFilm)}
+                  className="flex items-center gap-2 rounded-lg bg-red-600 px-10 py-4 text-lg font-bold text-white transition hover:bg-red-700"
+                >
+                  <Play className="h-6 w-6 fill-white" />
+                  PLAY NOW
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Video Player Modal */}
+      {videoUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4">
+          <div className="relative w-full max-w-6xl">
+            <button
+              onClick={() => setVideoUrl(null)}
+              className="absolute -top-12 right-0 text-3xl text-white hover:text-red-600"
+            >
+              ✕
+            </button>
+            <video
+              key={videoUrl}
+              controls
+              autoPlay
+              className="w-full rounded-lg"
+              src={videoUrl}
+            />
+          </div>
         </div>
       )}
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:flex-row">
-        <section className="lg:w-1/3">
-          <h2 className="mb-3 text-lg font-medium text-zinc-800 dark:text-zinc-200">
-            Library
-          </h2>
-          <div className="space-y-2 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            {listLoading ? (
-              <div className="p-4 text-sm text-zinc-500">Loading videos…</div>
-            ) : videos.length === 0 ? (
-              <div className="p-4 text-sm text-zinc-500">
-                No objects found in the bucket.
-              </div>
-            ) : (
-              videos.map((video) => (
-                <button
-                  key={video.key}
-                  onClick={() => handleSelect(video.key)}
-                  className={`flex w-full flex-col rounded-xl border px-3 py-2 text-left transition ${
-                    selectedKey === video.key
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-900/40 dark:text-blue-200"
-                      : "border-transparent bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-                  }`}
-                >
-                  <span className="truncate text-sm font-medium">
-                    {video.key.replace("videos/", "")}
-                  </span>
-                  <span className="mt-1 text-xs text-zinc-500">
-                    {video.size
-                      ? `${(video.size / 1024 / 1024).toFixed(2)} MB`
-                      : "Unknown size"}
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="flex-1">
-          <h2 className="mb-3 text-lg font-medium text-zinc-800 dark:text-zinc-200">
-            Player
-          </h2>
-          <div className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200/60 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
-            {videoLoading ? (
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                Generating signed URL…
-              </span>
-            ) : videoUrl ? (
-              <video
-                key={videoUrl}
-                controls
+      {/* Films Grid */}
+      <section className="bg-zinc-50 px-8 py-16 md:px-16 lg:px-24">
+        <h3 className="mb-6 text-3xl font-bold text-zinc-900">All Films</h3>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {films.map((film) => (
+            <button
+              key={film.id}
+              onClick={() => handleSelect(film)}
+              className="group relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900 transition-transform hover:scale-105 hover:z-10"
+            >
+              {/* Thumbnail Image */}
+              <img
+                src={`https://via.placeholder.com/400x600/333/fff?text=${encodeURIComponent(
+                  film.title
+                )}`}
+                alt={film.title}
                 className="h-full w-full object-cover"
-                src={videoUrl}
               />
-            ) : (
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                Select a video to start playback.
-              </span>
-            )}
-          </div>
-        </section>
-      </div>
+
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-100" />
+
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h4 className="text-lg font-bold text-white">{film.title}</h4>
+                <div className="mt-1 flex items-center gap-2 text-xs text-gray-300">
+                  {film.rating && (
+                    <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold">
+                      {film.rating}
+                    </span>
+                  )}
+                  <span>{film.releaseDate?.split("-")[0]}</span>
+                </div>
+              </div>
+
+              {/* Play Button on Hover */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
+                  <Play className="h-8 w-8 fill-white text-white" />
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
