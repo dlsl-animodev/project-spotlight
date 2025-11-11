@@ -1,6 +1,22 @@
 "use client";
 
+import { db } from "@/libs/firebase";
 import { useEffect, useState } from "react";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { filmsRef } from "@/libs/collections";
+import UploadFilm from "@/components/upload-film";
+
+export const filmSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+});
+
+export type FormFilmData = z.infer<typeof filmSchema>;
 
 type VideoItem = {
   key: string;
@@ -15,6 +31,27 @@ export default function Home() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [videoList, setVideoList] = useState<any[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormFilmData>({
+    resolver: zodResolver(filmSchema),
+  });
+
+  useEffect(() => {
+    const fetchVideosFromFirestore = async () => {
+      try {
+        const response = await getDocs(collection(db, "films"));
+        setVideoList(response.docs.map((doc) => doc.data()));
+      } catch (error) {
+        console.error("Error fetching videos from Firestore:", error);
+      }
+    };
+    fetchVideosFromFirestore();
+  }, []);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -64,6 +101,19 @@ export default function Home() {
           Film Society
         </h1>
       </header>
+      <UploadFilm />
+
+      <div>
+        Firestore videos:
+        <ul>
+          {videoList.map((video, index) => (
+            <div key={index}>
+              <li>{video.title}</li>
+              <li>{video.description}</li>
+            </div>
+          ))}
+        </ul>
+      </div>
 
       {error && (
         <div className="mx-auto w-full max-w-5xl rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
@@ -95,7 +145,7 @@ export default function Home() {
                   }`}
                 >
                   <span className="truncate text-sm font-medium">
-                    {video.key}
+                    {video.key.replace("videos/", "")}
                   </span>
                   <span className="mt-1 text-xs text-zinc-500">
                     {video.size
