@@ -41,6 +41,9 @@ const filmUploadSchema = z.object({
   file: z
     .any()
     .refine((file) => file instanceof File, "Video file is required"),
+  thumbnail: z
+    .any()
+    .refine((file) => file instanceof File, "Thumbnail file is required"),
 });
 
 type FormData = z.infer<typeof filmUploadSchema>;
@@ -74,7 +77,7 @@ export default function UploadFilm() {
       formData.append("file", data.file);
       formData.append("title", data.title);
 
-      const uploadResponse = await fetch("/api/upload", {
+      const uploadResponse = await fetch("/api/upload/film", {
         method: "POST",
         body: formData,
       });
@@ -84,6 +87,20 @@ export default function UploadFilm() {
       }
 
       const { key } = await uploadResponse.json();
+
+      const thumbnailFormData = new FormData();
+      thumbnailFormData.append("thumbnail", data.thumbnail);
+      thumbnailFormData.append("title", data.title);
+      const thumbnailUploadResponse = await fetch("/api/upload/thumbnail", {
+        method: "POST",
+        body: thumbnailFormData,
+      });
+
+      if (!thumbnailUploadResponse.ok) {
+        throw new Error("Failed to upload thumbnail");
+      }
+
+      const { thumbnailKey } = await thumbnailUploadResponse.json();
 
       // convert comma-separated strings to arrays for Firestore fields
       const genreArray = data.genre
@@ -114,6 +131,7 @@ export default function UploadFilm() {
         createdAt: new Date().toISOString(),
         // Store the R2 key for the video file
         key: key,
+        thumbnailKey: thumbnailKey,
       });
 
       // Reset form and close dialog
@@ -303,6 +321,33 @@ export default function UploadFilm() {
                   <FormDescription className="text-xs">
                     Upload the video file for this film
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="thumbnail"
+              render={({ field: { ref, name, onBlur, onChange } }) => (
+                <FormItem>
+                  <FormLabel>Thumbnail *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      ref={ref}
+                      name={name}
+                      onBlur={onBlur}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onChange(file);
+                        }
+                      }}
+                    />
+                  </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
