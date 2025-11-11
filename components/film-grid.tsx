@@ -139,7 +139,8 @@ export default function FilmCarousel() {
                   />
 
                   {/* title overlay bottom-left */}
-                  <div className="absolute bottom-3 left-3 z-10 w-[85%] rounded-md bg-linear-to-t from-black/75 via-black/40 to-transparent px-3 py-2 backdrop-blur-sm">
+
+                  {/* <div className="absolute bottom-3 left-3 z-10 w-[85%] rounded-md  px-3 py-2">
                     <p className="text-sm font-bold text-white line-clamp-2">
                       {film.title}
                     </p>
@@ -150,7 +151,7 @@ export default function FilmCarousel() {
                       <span>{film.releaseDate?.split("-")?.[0]}</span>
                       {film.duration && <span>{film.duration}m</span>}
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* center play button (semi-transparent) */}
                   <div className="absolute inset-0 flex items-center justify-center">
