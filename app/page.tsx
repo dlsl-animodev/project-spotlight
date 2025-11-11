@@ -17,7 +17,7 @@ export default function Home() {
       </header>
 
       {/* Sections */}
-      <main className="pt-24">
+      <main className="">
         <FeaturedFilm />
         <FilmGrid />
         <VideoModal />
