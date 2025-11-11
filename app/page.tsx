@@ -145,7 +145,7 @@ export default function Home() {
                   }`}
                 >
                   <span className="truncate text-sm font-medium">
-                    {video.key}
+                    {video.key.replace("videos/", "")}
                   </span>
                   <span className="mt-1 text-xs text-zinc-500">
                     {video.size
