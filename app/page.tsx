@@ -70,7 +70,7 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 z-50 w-full border-b border-zinc-200 bg-white px-8 py-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-red-600">NETFLIX</h1>
+          <h1 className="text-3xl font-bold text-red-600">SPOTLIGHT</h1>
           <UploadFilm />
         </div>
       </header>
