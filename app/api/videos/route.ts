@@ -7,13 +7,15 @@ export async function GET() {
     const results = await client.send(
       new ListObjectsV2Command({
         Bucket: process.env.R2_BUCKET!,
+        Prefix: "videos/", // Only list objects in the videos folder
         MaxKeys: 1000,
       })
     );
 
     const items = (results.Contents ?? [])
       .filter((obj) => Boolean(obj.Key))
-      .filter((obj) => !obj.Key!.endsWith("/"))
+      .filter((obj) => !obj.Key!.endsWith("/")) // Exclude folder markers
+      .filter((obj) => obj.Key!.startsWith("videos/")) // Double check it's in videos folder
       .map((obj) => ({
         key: obj.Key!,
         size: obj.Size ?? 0,

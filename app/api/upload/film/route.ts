@@ -11,8 +11,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const key = formData.get("title") + "-" + Date.now().toString();
+    const title = (formData.get("title") as string) || "untitled";
+    const sanitizedTitle = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
+    const key = `videos/${sanitizedTitle}`;
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

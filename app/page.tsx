@@ -108,8 +108,8 @@ export default function Home() {
         <ul>
           {videoList.map((video, index) => (
             <div key={index}>
-              <li key={index}>{video.title}</li>
-              <li key={index}>{video.description}</li>
+              <li>{video.title}</li>
+              <li>{video.description}</li>
             </div>
           ))}
         </ul>
