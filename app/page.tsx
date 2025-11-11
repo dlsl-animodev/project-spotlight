@@ -7,6 +7,66 @@ import UploadFilm from "@/components/upload-film";
 import { Film } from "@/type/film-type";
 import { Play } from "lucide-react";
 
+// Component to fetch and display thumbnail
+function ThumbnailImage({
+  thumbnailKey,
+  alt,
+  className,
+}: {
+  thumbnailKey?: string;
+  alt: string;
+  className?: string;
+}) {
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchThumbnail = async () => {
+      if (!thumbnailKey) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/signed-url?key=${encodeURIComponent(thumbnailKey)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setThumbnailUrl(data.url);
+        }
+      } catch (err) {
+        console.error("thumbnail fetch error", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchThumbnail();
+  }, [thumbnailKey]);
+
+  if (loading) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-zinc-800 ${className}`}
+      >
+        <span className="text-zinc-400">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!thumbnailUrl) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-zinc-800 ${className}`}
+      >
+        <span className="text-zinc-400">{alt}</span>
+      </div>
+    );
+  }
+
+  return <img src={thumbnailUrl} alt={alt} className={className} />;
+}
+
 export default function Home() {
   const [films, setFilms] = useState<Film[]>([]);
   const [listLoading, setListLoading] = useState(true);
@@ -117,10 +177,8 @@ export default function Home() {
 
               {/* Thumbnail Image */}
               <div className="mx-auto w-full max-w-2xl">
-                <img
-                  src={`https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(
-                    featuredFilm.title
-                  )}`}
+                <ThumbnailImage
+                  thumbnailKey={featuredFilm.thumbnailKey}
                   alt={featuredFilm.title}
                   className="w-full rounded-lg shadow-2xl"
                 />
@@ -212,10 +270,8 @@ export default function Home() {
               className="group relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900 transition-transform hover:scale-105 hover:z-10"
             >
               {/* Thumbnail Image */}
-              <img
-                src={`https://via.placeholder.com/400x600/333/fff?text=${encodeURIComponent(
-                  film.title
-                )}`}
+              <ThumbnailImage
+                thumbnailKey={film.thumbnailKey}
                 alt={film.title}
                 className="h-full w-full object-cover"
               />
