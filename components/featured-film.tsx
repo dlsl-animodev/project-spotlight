@@ -9,7 +9,7 @@ export default function FeaturedFilm() {
 
   if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex h-screen items-center justify-center bg-black">
         <p className="text-white">Loading featured film...</p>
       </div>
     );
@@ -17,30 +17,62 @@ export default function FeaturedFilm() {
   if (!featuredFilm) return null;
 
   return (
-    <section className="relative min-h-screen bg-white pt-24 text-center">
-      <h2 className="text-7xl font-black text-red-600">
-        {featuredFilm.title.toUpperCase()}
-      </h2>
+    <section className="relative flex h-screen w-full flex-col items-center justify-center bg-white px-4 text-center">
+      <div className="max-w-4xl space-y-6">
+        {/* Title */}
+        <h2 className="text-7xl font-black text-red-600 md:text-7xl lg:text-8xl">
+          {featuredFilm.title.toUpperCase()}
+        </h2>
 
-      <div className="mx-auto w-full max-w-2xl">
-        <ThumbnailImage
-          thumbnailKey={featuredFilm.thumbnailKey}
-          alt={featuredFilm.title}
-          className="w-full rounded-lg shadow-2xl"
-        />
+        {/* Thumbnail */}
+        <div className="mx-auto max-w-xl">
+          <ThumbnailImage
+            thumbnailKey={featuredFilm.thumbnailKey}
+            alt={featuredFilm.title}
+            className="w-full rounded-xl shadow-lg"
+          />
+        </div>
+
+        {/* Metadata */}
+        <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-700">
+          <span className="rounded bg-red-600 px-3 py-1 font-semibold text-white">
+            {featuredFilm.rating || "NR"}
+          </span>
+          <span>{featuredFilm.releaseDate?.split("-")[0]}</span>
+          {featuredFilm.duration && <span>{featuredFilm.duration} min</span>}
+          {featuredFilm.genre && <span>{featuredFilm.genre.join(", ")}</span>}
+        </div>
+
+        {/* Description */}
+        <p className="mx-auto max-w-2xl text-base leading-relaxed text-zinc-700 md:text-lg">
+          {featuredFilm.description}
+        </p>
+
+        {/* Actors / Director */}
+        <div className="space-y-1 text-zinc-800">
+          {featuredFilm.actors?.length > 0 && (
+            <p className="text-sm">
+              <span className="font-semibold">Starring: </span>
+              {featuredFilm.actors.join(", ")}
+            </p>
+          )}
+          {featuredFilm.director && (
+            <p className="text-sm">
+              <span className="font-semibold">Director: </span>
+              {featuredFilm.director}
+            </p>
+          )}
+        </div>
+
+        {/* Play Button */}
+        <button
+          onClick={() => handleSelect(featuredFilm)}
+          className="mx-auto flex items-center gap-2 rounded-lg bg-red-600 px-8 py-3 text-base font-bold text-white transition hover:bg-red-700"
+        >
+          <Play className="h-5 w-5 fill-white" />
+          PLAY NOW
+        </button>
       </div>
-
-      <p className="mx-auto mt-6 max-w-2xl text-zinc-700">
-        {featuredFilm.description}
-      </p>
-
-      <button
-        onClick={() => handleSelect(featuredFilm)}
-        className="mt-8 flex items-center justify-center gap-2 rounded-lg bg-red-600 px-10 py-4 text-lg font-bold text-white transition hover:bg-red-700 mx-auto"
-      >
-        <Play className="h-6 w-6 fill-white" />
-        PLAY NOW
-      </button>
     </section>
   );
 }

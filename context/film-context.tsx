@@ -23,6 +23,7 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch all films from Firestore
   useEffect(() => {
@@ -76,6 +77,24 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
       setVideoUrl(null);
     }
   };
+
+  // modal stuff
+
+  useEffect(() => {
+    // prevent background scroll when modal is open
+    document.body.style.overflow = isModalOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsModalOpen(false);
+    }
+    if (isModalOpen) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isModalOpen]);
 
   const closeVideo = () => setVideoUrl(null);
 

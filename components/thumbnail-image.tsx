@@ -72,6 +72,7 @@ export default function ThumbnailImage({
       width={800}
       height={600}
       className={className}
+      priority={true}
     />
   );
 }
