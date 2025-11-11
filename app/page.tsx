@@ -6,6 +6,7 @@ import { getDocs, collection } from "firebase/firestore";
 import UploadFilm from "@/components/upload-film";
 import { Film } from "@/type/film-type";
 import { Play } from "lucide-react";
+import Image from "next/image";
 
 // Component to fetch and display thumbnail
 function ThumbnailImage({
@@ -64,7 +65,7 @@ function ThumbnailImage({
     );
   }
 
-  return <img src={thumbnailUrl} alt={alt} className={className} />;
+  return <Image src={thumbnailUrl} alt={alt} className={className} />;
 }
 
 export default function Home() {
@@ -267,7 +268,7 @@ export default function Home() {
             <button
               key={film.id}
               onClick={() => handleSelect(film)}
-              className="group relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900 transition-transform hover:scale-105 hover:z-10"
+              className="group relative aspect-2/3 overflow-hidden rounded-lg bg-zinc-900 transition-transform hover:scale-105 hover:z-10"
             >
               {/* Thumbnail Image */}
               <ThumbnailImage
@@ -277,7 +278,7 @@ export default function Home() {
               />
 
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-100" />
 
               {/* Title Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-4">
