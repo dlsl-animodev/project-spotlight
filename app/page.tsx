@@ -23,10 +23,28 @@ export default function Home() {
         })) as Film[];
         setFilms(filmsData);
 
-        // Set first featured film or first film as default
-        const featured = filmsData.find((f) => f.featured) || filmsData[0];
-        if (featured) {
-          setSelectedFilm(featured);
+        // Get latest featured film (most recent createdAt)
+        const featuredFilms = filmsData.filter((f) => f.featured);
+        let latestFeatured: Film | undefined;
+
+        if (featuredFilms.length > 0) {
+          // Sort by createdAt descending to get the latest
+          latestFeatured = featuredFilms.sort((a, b) => {
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          })[0];
+        } else {
+          // If no featured films, get the most recently created film
+          latestFeatured = filmsData.sort((a, b) => {
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          })[0];
+        }
+
+        if (latestFeatured) {
+          setSelectedFilm(latestFeatured);
         }
       } catch (error) {
         console.error("Error fetching films from Firestore:", error);
@@ -55,7 +73,18 @@ export default function Home() {
     }
   };
 
-  const featuredFilm = films.find((f) => f.featured) || films[0];
+  // Get latest featured film (most recent createdAt)
+  const featuredFilms = films.filter((f) => f.featured);
+  const featuredFilm =
+    featuredFilms.length > 0
+      ? featuredFilms.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )[0]
+      : films.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )[0];
 
   if (listLoading) {
     return (
