@@ -89,7 +89,7 @@ export default function FeaturedFilm() {
             )}
 
             {/* Description */}
-            <p className="text-base leading-relaxed text-zinc-700 md:text-lg">
+            <p className="text-base leading-relaxed text-black md:text-lg">
               {featuredFilm.description}
             </p>
 
