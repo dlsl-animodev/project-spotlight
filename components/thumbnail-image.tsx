@@ -42,37 +42,39 @@ export default function ThumbnailImage({
     fetchThumbnail();
   }, [thumbnailKey]);
 
-  // Loading state
+  // Loading placeholder
   if (loading) {
     return (
       <div
-        className={`flex items-center justify-center bg-zinc-800 text-zinc-400 ${className}`}
+        className={`flex aspect-[2/3] items-center justify-center bg-zinc-800 text-zinc-400 ${className}`}
       >
         Loading...
       </div>
     );
   }
 
-  // Fallback if no thumbnail
+  // Fallback if no image
   if (!thumbnailUrl) {
     return (
       <div
-        className={`flex items-center justify-center bg-zinc-800 text-zinc-400 ${className}`}
+        className={`flex aspect-[2/3] items-center justify-center bg-zinc-800 text-zinc-400 ${className}`}
       >
         {alt}
       </div>
     );
   }
 
-  // Render image
+  // Render portrait poster image
   return (
-    <Image
-      src={thumbnailUrl}
-      alt={alt}
-      width={800}
-      height={600}
-      className={className}
-      priority={true}
-    />
+    <div className={`relative aspect-2/3 w-full overflow-hidden ${className}`}>
+      <Image
+        src={thumbnailUrl}
+        alt={alt}
+        fill
+        className="object-cover"
+        priority
+        sizes="(max-width: 768px) 100vw, 400px"
+      />
+    </div>
   );
 }

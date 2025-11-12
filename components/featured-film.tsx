@@ -17,19 +17,19 @@ export default function FeaturedFilm() {
   if (!featuredFilm) return null;
 
   return (
-    <section className="relative flex h-screen w-full flex-col items-center justify-center bg-white px-4 text-center">
+    <section className="relative flex h-screen w-full flex-col items-center justify-center bg-white/80 px-4 text-center backdrop-blur-sm">
       <div className="max-w-4xl space-y-6">
         {/* Title */}
         <h2 className="text-7xl font-black text-red-600 md:text-7xl lg:text-8xl">
           {featuredFilm.title.toUpperCase()}
         </h2>
 
-        {/* Thumbnail */}
-        <div className="mx-auto max-w-xl">
+        {/* Thumbnail (poster size, smaller) */}
+        <div className="mx-auto aspect-2/3 w-48 md:w-56 lg:w-64">
           <ThumbnailImage
             thumbnailKey={featuredFilm.thumbnailKey}
             alt={featuredFilm.title}
-            className="w-full rounded-xl shadow-lg"
+            className="h-full w-full rounded-xl object-cover shadow-lg"
           />
         </div>
 
