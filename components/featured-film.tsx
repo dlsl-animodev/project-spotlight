@@ -69,13 +69,13 @@ export default function FeaturedFilm() {
           </div>
 
           {/* Right: Metadata */}
-          <div className="flex flex-col justify-center space-y-4 text-left">
+          <div className="flex flex-col justify-center space-y-4  text-left">
             {/* Rating/Year/Duration/Genre */}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-700">
+            <div className="flex flex-wrap items-center gap-18 text-sm text-zinc-700 ">
               <span className="rounded bg-red-600 px-3 py-1 font-semibold text-white">
                 {featuredFilm.rating || "NR"}
               </span>
-              <span>{featuredFilm.releaseDate?.split("-")[0]}</span>
+              <span>{featuredFilm.releaseDate}</span>
               {featuredFilm.duration && (
                 <span>{featuredFilm.duration} min</span>
               )}
@@ -89,7 +89,7 @@ export default function FeaturedFilm() {
             )}
 
             {/* Description */}
-            <p className="text-base leading-relaxed text-zinc-700 md:text-lg">
+            <p className="text-base leading-relaxed text-black md:text-lg">
               {featuredFilm.description}
             </p>
 
