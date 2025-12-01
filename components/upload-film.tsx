@@ -48,7 +48,11 @@ const filmUploadSchema = z.object({
 
 type FormData = z.infer<typeof filmUploadSchema>;
 
-export default function UploadFilm() {
+interface UploadFilmProps {
+  onSuccess?: () => void;
+}
+
+export default function UploadFilm({ onSuccess }: UploadFilmProps) {
   const [open, setOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -138,6 +142,7 @@ export default function UploadFilm() {
       form.reset();
       setOpen(false);
       alert("Film uploaded successfully!");
+      onSuccess?.();
     } catch (error) {
       console.error("Upload error:", error);
       alert("Failed to upload film. Please try again.");
