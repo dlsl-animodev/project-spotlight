@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "./ui/input";
 
 export default function FilmGrid() {
   const { films } = useFilm();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [search, setSearch] = useState(false);
-  const [filmsFiltered, setFilmsFiltered] = useState(films);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter films based on search query
+  const filmsFiltered = searchQuery
+    ? films.filter((film) =>
+        film.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : films;
 
   if (!films || films.length === 0) return null;
 
@@ -30,22 +37,24 @@ export default function FilmGrid() {
             />
           )}
           {search && (
-            <div className="ml-4">
+            <div className="flex items-center gap-2">
               <Input
                 type="text"
-                onChange={(e) => {
-                  const query = e.target.value.toLowerCase();
-                  setFilmsFiltered(
-                    films.filter((film) =>
-                      film.title.toLowerCase().includes(query)
-                    )
-                  );
-                }}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search films..."
-                className="rounded-md border border-gray-300 px-3 py-1"
+                className="w-40 rounded-md border border-gray-300 px-3 py-1 sm:w-56"
                 autoFocus
-                onBlur={() => setSearch(false)}
               />
+              <button
+                onClick={() => {
+                  setSearch(false);
+                  setSearchQuery("");
+                }}
+                className="rounded-full p-1 hover:bg-zinc-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>

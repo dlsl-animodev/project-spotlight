@@ -31,6 +31,8 @@ export default function Home() {
         <FeaturedFilm />
         <FilmGrid />
         <VideoModal />
+
+        <div>upcoming!</div>
       </main>
     </div>
   );
