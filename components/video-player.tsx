@@ -119,15 +119,52 @@ export default function VideoPlayer({
     );
   }, []);
 
-  // Fullscreen toggle
+  // Fullscreen toggle - works on both desktop and mobile
   const toggleFullscreen = useCallback(async () => {
-    if (!containerRef.current) return;
+    const video = videoRef.current;
+    const container = containerRef.current;
+    
+    if (!video || !container) return;
 
     try {
-      if (!document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+      // Check if we're currently in fullscreen
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+
+      if (!isCurrentlyFullscreen) {
+        // Try to enter fullscreen - prioritize video element for mobile
+        if (video.requestFullscreen) {
+          await video.requestFullscreen();
+        } else if ((video as any).webkitRequestFullscreen) {
+          // Safari desktop
+          await (video as any).webkitRequestFullscreen();
+        } else if ((video as any).webkitEnterFullscreen) {
+          // iOS Safari - this is the key for mobile!
+          await (video as any).webkitEnterFullscreen();
+        } else if ((container as any).webkitRequestFullscreen) {
+          await (container as any).webkitRequestFullscreen();
+        } else if ((container as any).mozRequestFullScreen) {
+          await (container as any).mozRequestFullScreen();
+        } else if ((container as any).msRequestFullscreen) {
+          await (container as any).msRequestFullscreen();
+        } else if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        }
       } else {
-        await document.exitFullscreen();
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
       }
     } catch (err) {
       console.error("Fullscreen error:", err);
@@ -257,14 +294,46 @@ export default function VideoPlayer({
     }
   }, []);
 
-  // Fullscreen change listener
+  // Fullscreen change listener - handles all browser prefixes
   useEffect(() => {
     const onFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isFs = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreen(isFs);
     };
+
+    // Listen for fullscreen changes on video element too (for iOS)
+    const video = videoRef.current;
+    const onVideoFullscreenChange = () => {
+      setIsFullscreen(!!(video as any)?.webkitDisplayingFullscreen);
+    };
+
     document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () =>
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    document.addEventListener("mozfullscreenchange", onFullscreenChange);
+    document.addEventListener("MSFullscreenChange", onFullscreenChange);
+    
+    // iOS Safari specific
+    if (video) {
+      video.addEventListener("webkitbeginfullscreen", () => setIsFullscreen(true));
+      video.addEventListener("webkitendfullscreen", () => setIsFullscreen(false));
+    }
+
+    return () => {
       document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", onFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", onFullscreenChange);
+      
+      if (video) {
+        video.removeEventListener("webkitbeginfullscreen", () => setIsFullscreen(true));
+        video.removeEventListener("webkitendfullscreen", () => setIsFullscreen(false));
+      }
+    };
   }, []);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -285,6 +354,8 @@ export default function VideoPlayer({
         className="h-full w-full cursor-pointer object-contain"
         onClick={togglePlay}
         playsInline
+        webkit-playsinline="true"
+        x5-playsinline="true"
       />
 
       {/* Loading Spinner */}
