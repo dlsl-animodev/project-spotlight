@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
+import Link from "next/link";
 
 export default function FilmGrid() {
   const { films } = useFilm();
@@ -41,8 +42,8 @@ export default function FilmGrid() {
                   <div className="absolute -bottom-2 -left-3 -right-3 -top-24 bg-red-600 md:-bottom-3 md:-left-8 md:-right-8 md:-top-28 lg:-top-32" />
                 )}
 
-                <button
-                  onClick={() => router.push(`/film/${film.id}`)}
+                <Link
+                  href={`/film/${film.id}`}
                   className="relative block w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300"
                 >
                   {/* Thumbnail */}
@@ -66,7 +67,7 @@ export default function FilmGrid() {
                       {film.title}
                     </p>
                   </div>
-                </button>
+                </Link>
               </div>
             );
           })}
