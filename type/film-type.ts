@@ -6,6 +6,7 @@ export type Film = {
   director?: string; // Optional director field
   key: string; // Cloudflare R2 key for the video file
   thumbnailKey?: string; // Cloudflare R2 key for thumbnail/poster
+  coverphotoKey?: string; // Cloudflare R2 key for cover photo/banner
   genre: string[]; // e.g., ['Action', 'Drama']
   releaseDate: string; // ISO date string
   duration?: number; // Length in minutes

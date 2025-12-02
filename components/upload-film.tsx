@@ -44,6 +44,9 @@ const filmUploadSchema = z.object({
   thumbnail: z
     .any()
     .refine((file) => file instanceof File, "Thumbnail file is required"),
+  coverphoto: z
+    .any()
+    .refine((file) => file instanceof File, "Cover photo file is required"),
 });
 
 type FormData = z.infer<typeof filmUploadSchema>;
@@ -94,6 +97,8 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
 
       const thumbnailFormData = new FormData();
       thumbnailFormData.append("thumbnail", data.thumbnail);
+      thumbnailFormData.append("coverphoto", data.coverphoto);
+
       thumbnailFormData.append("title", data.title);
       const thumbnailUploadResponse = await fetch("/api/upload/thumbnail", {
         method: "POST",
@@ -104,7 +109,8 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
         throw new Error("Failed to upload thumbnail");
       }
 
-      const { thumbnailKey } = await thumbnailUploadResponse.json();
+      const { thumbnailKey, coverphotoKey } =
+        await thumbnailUploadResponse.json();
 
       // convert comma-separated strings to arrays for Firestore fields
       const genreArray = data.genre
@@ -133,9 +139,10 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
         featured: data.featured,
         id: "",
         createdAt: new Date().toISOString(),
-        // Store the R2 key for the video file
+        // Store the R2 keys for the files
         key: key,
         thumbnailKey: thumbnailKey,
+        coverphotoKey: coverphotoKey,
       });
 
       // Reset form and close dialog
@@ -345,9 +352,35 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
                       name={name}
                       onBlur={onBlur}
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          onChange(file);
+                        const thumbnailFile = e.target.files?.[0];
+                        if (thumbnailFile) {
+                          onChange(thumbnailFile);
+                        }
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="coverphoto"
+              render={({ field: { ref, name, onBlur, onChange } }) => (
+                <FormItem>
+                  <FormLabel>Cover Photo *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      ref={ref}
+                      name={name}
+                      onBlur={onBlur}
+                      onChange={(e) => {
+                        const coverPhotoFile = e.target.files?.[0];
+                        if (coverPhotoFile) {
+                          onChange(coverPhotoFile);
                         }
                       }}
                     />

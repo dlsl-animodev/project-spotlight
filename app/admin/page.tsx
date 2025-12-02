@@ -196,6 +196,17 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error deleting film:", error);
     }
+
+    await fetch("/api/delete-files", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        videoKey: selectedFilm?.key,
+        thumbnailKey: selectedFilm?.thumbnailKey,
+      }),
+    });
   };
 
   // Chart data
