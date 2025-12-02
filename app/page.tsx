@@ -3,8 +3,7 @@
 import FeaturedFilm from "@/components/featured-film";
 import FilmGrid from "@/components/film-grid";
 import VideoModal from "@/components/video-modal";
-import { Search, ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import { Search } from "lucide-react";
 
 export default function Home() {
   return (
@@ -23,9 +22,7 @@ export default function Home() {
           <button
             className="rounded-full p-2 text-zinc-600 transition hover:bg-zinc-100"
             aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+          ></button>
         </div>
       </header>
 
