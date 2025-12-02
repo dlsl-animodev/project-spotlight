@@ -11,11 +11,13 @@ export default function FeaturedFilm() {
 
   useEffect(() => {
     const fetchBackground = async () => {
-      if (!featuredFilm?.thumbnailKey) return;
+      if (!featuredFilm?.coverphotoKey) return;
 
       try {
         const res = await fetch(
-          `/api/signed-url?key=${encodeURIComponent(featuredFilm.thumbnailKey)}`
+          `/api/signed-url?key=${encodeURIComponent(
+            featuredFilm.coverphotoKey
+          )}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -27,7 +29,7 @@ export default function FeaturedFilm() {
     };
 
     fetchBackground();
-  }, [featuredFilm?.thumbnailKey]);
+  }, [featuredFilm?.coverphotoKey]);
 
   if (loading)
     return (

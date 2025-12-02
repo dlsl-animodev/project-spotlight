@@ -5,8 +5,13 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("thumbnail") as File | null;
-    if (!file) {
+    const thumbnailFile = formData.get("thumbnail") as File | null;
+    const coverphotoFile = formData.get("coverphoto") as File | null;
+    if (!thumbnailFile) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    if (!coverphotoFile) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
@@ -18,23 +23,39 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
-    const key = `thumbnail/${sanitizedTitle}`;
+    const thumbnailKey = `thumbnail/${sanitizedTitle}`;
+    const coverphotoKey = `coverphoto/${sanitizedTitle}`;
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const thumbnailBytes = await thumbnailFile.arrayBuffer();
+    const thumbnailBuffer = Buffer.from(thumbnailBytes);
 
-    //upload to r2
+    const coverphotoBytes = await coverphotoFile.arrayBuffer();
+    const coverphotoBuffer = Buffer.from(coverphotoBytes);
+
+    // Upload thumbnail to R2
     await client.send(
       new PutObjectCommand({
         Bucket: process.env.R2_BUCKET!,
-        Key: key,
-        Body: buffer,
-        ContentType: file.type,
+        Key: thumbnailKey,
+        Body: thumbnailBuffer,
+        ContentType: thumbnailFile.type,
       })
     );
+
+    // Upload cover photo to R2
+    await client.send(
+      new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET!,
+        Key: coverphotoKey,
+        Body: coverphotoBuffer,
+        ContentType: coverphotoFile.type,
+      })
+    );
+
     return NextResponse.json({
-      message: "File uploaded successfully",
-      thumbnailKey: key,
+      message: "Files uploaded successfully",
+      thumbnailKey: thumbnailKey,
+      coverphotoKey: coverphotoKey,
     });
   } catch (error) {
     console.error("Upload error:", error);

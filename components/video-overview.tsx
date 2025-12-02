@@ -53,7 +53,7 @@ export default function VideoOverview({
               <div className="md:flex-1">
                 <div className="relative overflow-hidden rounded-lg">
                   <ThumbnailImage
-                    thumbnailKey={film.thumbnailKey}
+                    thumbnailKey={film.coverphotoKey}
                     alt={film.title}
                     className="h-64 w-full object-cover md:h-[460px] lg:h-[520px]"
                   />
