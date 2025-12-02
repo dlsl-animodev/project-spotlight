@@ -4,6 +4,7 @@ import { useFilm } from "@/context/film-context";
 import { Play } from "lucide-react";
 import ThumbnailImage from "@/components/thumbnail-image";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function FeaturedFilm() {
   const { featuredFilm, handleSelect, loading } = useFilm();
@@ -112,13 +113,14 @@ export default function FeaturedFilm() {
             </div>
 
             {/* Play Button */}
-            <button
-              onClick={() => handleSelect(featuredFilm)}
+
+            <Link
+              href={`/film/${featuredFilm.id}`}
               className="flex w-fit items-center gap-2 rounded-lg bg-red-600 px-8 py-3 text-base font-bold text-white transition hover:bg-red-700"
             >
               <Play className="h-5 w-5 fill-white" />
               PLAY NOW
-            </button>
+            </Link>
           </div>
         </div>
       </div>
