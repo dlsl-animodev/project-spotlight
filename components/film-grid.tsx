@@ -20,7 +20,7 @@ export default function FilmGrid() {
       {/* Section Header */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-6 flex items-center justify-between md:mb-8">
-          <h2 className="text-xl font-bold text-zinc-900 md:text-2xl">
+          <h2 className="text-xl font-bold text-red-600 md:text-2xl">
             All Films
           </h2>
           {!search && (
