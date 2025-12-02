@@ -15,7 +15,7 @@ import {
   Clapperboard,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import VideoPlayer from "@/components/video-player";
 
 export default function FilmDetailPage() {
   const params = useParams();
@@ -117,25 +117,18 @@ export default function FilmDetailPage() {
 
   return (
     <div className="min-h-screen bg-zinc-900">
-      {/* Video Player - Full screen when playing */}
+      {/* Custom Netflix-style Video Player */}
       {isPlaying && videoUrl ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 bg-black"
         >
-          <button
-            onClick={() => setIsPlaying(false)}
-            className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-white backdrop-blur-sm transition hover:bg-white/20"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back
-          </button>
-          <video
+          <VideoPlayer
             src={videoUrl}
-            controls
-            autoPlay
-            className="h-full w-full object-contain"
+            title={film.title}
+            onBack={() => setIsPlaying(false)}
+            poster={thumbnailUrl || undefined}
           />
         </motion.div>
       ) : (
@@ -177,7 +170,7 @@ export default function FilmDetailPage() {
                 >
                   {thumbnailUrl && (
                     <div className="relative overflow-hidden rounded-xl shadow-2xl ring-4 ring-white/20">
-                      <Image
+                      <img
                         src={thumbnailUrl}
                         alt={film.title}
                         className="h-[280px] w-[190px] object-cover lg:h-[340px] lg:w-[230px]"
@@ -311,7 +304,7 @@ export default function FilmDetailPage() {
                 {/* Mobile Thumbnail */}
                 {thumbnailUrl && (
                   <div className="md:hidden">
-                    <Image
+                    <img
                       src={thumbnailUrl}
                       alt={film.title}
                       className="w-full rounded-xl shadow-lg"
