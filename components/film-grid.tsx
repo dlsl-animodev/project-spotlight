@@ -1,15 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
 import Link from "next/link";
+import { Search, X } from "lucide-react";
+import { Input } from "./ui/input";
 
 export default function FilmGrid() {
   const { films } = useFilm();
-  const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [search, setSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter films based on search query
+  const filmsFiltered = searchQuery
+    ? films.filter((film) =>
+        film.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : films;
 
   if (!films || films.length === 0) return null;
 
@@ -18,16 +27,48 @@ export default function FilmGrid() {
       {/* Section Header */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-6 flex items-center justify-between md:mb-8">
-          <h2 className="text-xl font-bold text-zinc-900 md:text-2xl">
+          <h2 className="text-xl font-bold text-red-600 md:text-2xl">
             All Films
           </h2>
+          {!search && (
+            <Search
+              onClick={() => setSearch(true)}
+              className="cursor-pointer"
+            />
+          )}
+          {search && (
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search films..."
+                className="w-40 rounded-md border border-gray-300 px-3 py-1 sm:w-56"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  setSearch(false);
+                  setSearchQuery("");
+                }}
+                className="rounded-full p-1 hover:bg-zinc-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
+      </div>
+      <div>
+        {filmsFiltered.length === 0 && (
+          <p className="text-center text-zinc-600">No films found.</p>
+        )}
       </div>
 
       {/* Grid Container */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="grid grid-cols-2 gap-3 pt-24 sm:grid-cols-3 md:grid-cols-4 md:gap-4 md:pt-28 lg:grid-cols-5 lg:pt-32">
-          {films.map((film, i) => {
+          {filmsFiltered.map((film, i) => {
             const isHovered = i === hoveredIndex;
 
             return (
@@ -47,7 +88,7 @@ export default function FilmGrid() {
                   className="relative block w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300"
                 >
                   {/* Thumbnail */}
-                  <div className="relative aspect-[2/3] overflow-hidden">
+                  <div className="relative aspect-2/3 overflow-hidden">
                     <ThumbnailImage
                       thumbnailKey={film.thumbnailKey}
                       alt={film.title}

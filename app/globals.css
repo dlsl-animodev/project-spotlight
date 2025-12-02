@@ -131,3 +131,8 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+::selection {
+  background-color: var(--color-red-600) /* oklch(57.7% 0.245 27.325) */; /* Change to your desired background color */
+  color: white; /* Change to your desired text color */
+}
