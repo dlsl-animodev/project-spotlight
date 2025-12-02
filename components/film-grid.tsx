@@ -1,32 +1,14 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
-import VideoOverview from "./video-overview";
-import { Film } from "@/type/film-type";
 
 export default function FilmGrid() {
-  const { films, handleSelect } = useFilm();
-  const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { films } = useFilm();
+  const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const openModal = (film: Film) => {
-    setSelectedFilm(film);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedFilm(null), 220);
-  }, []);
-
-  const handlePlay = () => {
-    if (!selectedFilm) return;
-    handleSelect(selectedFilm);
-    closeModal();
-  };
 
   if (!films || films.length === 0) return null;
 
@@ -60,7 +42,7 @@ export default function FilmGrid() {
                 )}
 
                 <button
-                  onClick={() => openModal(film)}
+                  onClick={() => router.push(`/film/${film.id}`)}
                   className="relative block w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300"
                 >
                   {/* Thumbnail */}
@@ -90,14 +72,6 @@ export default function FilmGrid() {
           })}
         </div>
       </div>
-
-      {/* Modal */}
-      <VideoOverview
-        film={selectedFilm}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onPlay={handlePlay}
-      />
     </section>
   );
 }
