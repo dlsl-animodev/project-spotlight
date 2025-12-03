@@ -163,6 +163,16 @@ export default function AdminDashboard() {
   const handleUpdateFilm = async () => {
     if (!selectedFilm) return;
     try {
+      // If marking as featured, un-feature all other films first
+      if (formData.featured && !selectedFilm.featured) {
+        const currentFeatured = films.filter(
+          (f) => f.featured && f.id !== selectedFilm.id
+        );
+        for (const film of currentFeatured) {
+          await updateDoc(doc(db, "films", film.id), { featured: false });
+        }
+      }
+
       const filmRef = doc(db, "films", selectedFilm.id);
       await updateDoc(filmRef, {
         title: formData.title,
@@ -418,9 +428,9 @@ export default function AdminDashboard() {
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-zinc-500">Featured Films</p>
-                      <p className="text-3xl font-bold text-zinc-900">
-                        {films.filter((f) => f.featured).length}
+                      <p className="text-sm text-zinc-500">Featured Film</p>
+                      <p className="text-lg font-bold text-zinc-900 truncate max-w-[150px]">
+                        {films.find((f) => f.featured)?.title || "None"}
                       </p>
                     </div>
                     <div className="rounded-full bg-red-100 p-3">

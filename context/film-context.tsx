@@ -37,22 +37,9 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
 
         setFilms(filmsData);
 
-        // Determine featured film
-        const featured = filmsData.filter((f) => f.featured);
-        const latest =
-          featured.length > 0
-            ? featured.sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )[0]
-            : filmsData.sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )[0];
-
-        setFeaturedFilm(latest ?? null);
+        // Find the single featured film (only one can be featured at a time)
+        const featured = filmsData.find((f) => f.featured);
+        setFeaturedFilm(featured ?? null);
       } catch (err) {
         console.error("Error fetching films:", err);
       } finally {
