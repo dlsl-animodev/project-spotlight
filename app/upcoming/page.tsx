@@ -271,30 +271,6 @@ export default function UpcomingPage() {
                           )}
                         </div>
                       </div>
-
-                      {/* Actions */}
-                      <div className="mt-6 flex items-center gap-3">
-                        <button
-                          onClick={() => toggleNotify(film.id)}
-                          className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                            notifyList.includes(film.id)
-                              ? "bg-red-600 text-white"
-                              : "bg-zinc-200 text-zinc-700 hover:bg-zinc-300"
-                          }`}
-                        >
-                          {notifyList.includes(film.id) ? (
-                            <>
-                              <BellOff className="h-4 w-4" />
-                              Notified
-                            </>
-                          ) : (
-                            <>
-                              <Bell className="h-4 w-4" />
-                              Notify Me
-                            </>
-                          )}
-                        </button>
-                      </div>
                     </div>
                   </motion.div>
                 ))}
