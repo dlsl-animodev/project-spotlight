@@ -7,11 +7,9 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const thumbnailFile = formData.get("thumbnail") as File | null;
     const coverphotoFile = formData.get("coverphoto") as File | null;
-    if (!thumbnailFile) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-
-    if (!coverphotoFile) {
+    
+    // At least one file should be provided
+    if (!thumbnailFile && !coverphotoFile) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
@@ -23,34 +21,40 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
-    const thumbnailKey = `thumbnail/${sanitizedTitle}`;
-    const coverphotoKey = `coverphoto/${sanitizedTitle}`;
+    let thumbnailKey = "";
+    let coverphotoKey = "";
 
-    const thumbnailBytes = await thumbnailFile.arrayBuffer();
-    const thumbnailBuffer = Buffer.from(thumbnailBytes);
+    // Upload thumbnail if provided
+    if (thumbnailFile && thumbnailFile.size > 0) {
+      thumbnailKey = `thumbnail/${sanitizedTitle}`;
+      const thumbnailBytes = await thumbnailFile.arrayBuffer();
+      const thumbnailBuffer = Buffer.from(thumbnailBytes);
 
-    const coverphotoBytes = await coverphotoFile.arrayBuffer();
-    const coverphotoBuffer = Buffer.from(coverphotoBytes);
+      await client.send(
+        new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET!,
+          Key: thumbnailKey,
+          Body: thumbnailBuffer,
+          ContentType: thumbnailFile.type,
+        })
+      );
+    }
 
-    // Upload thumbnail to R2
-    await client.send(
-      new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET!,
-        Key: thumbnailKey,
-        Body: thumbnailBuffer,
-        ContentType: thumbnailFile.type,
-      })
-    );
+    // Upload cover photo if provided
+    if (coverphotoFile && coverphotoFile.size > 0) {
+      coverphotoKey = `coverphoto/${sanitizedTitle}`;
+      const coverphotoBytes = await coverphotoFile.arrayBuffer();
+      const coverphotoBuffer = Buffer.from(coverphotoBytes);
 
-    // Upload cover photo to R2
-    await client.send(
-      new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET!,
-        Key: coverphotoKey,
-        Body: coverphotoBuffer,
-        ContentType: coverphotoFile.type,
-      })
-    );
+      await client.send(
+        new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET!,
+          Key: coverphotoKey,
+          Body: coverphotoBuffer,
+          ContentType: coverphotoFile.type,
+        })
+      );
+    }
 
     return NextResponse.json({
       message: "Files uploaded successfully",
