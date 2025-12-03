@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import ThumbnailImage from "@/components/thumbnail-image";
 import CoverPhotoImage from "@/components/coverphoto-image";
+import Navbar from "@/components/navbar";
 
 // Calculate days until release
 const getDaysUntil = (dateString: string) => {
@@ -84,38 +85,7 @@ export default function UpcomingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 md:h-16 md:px-6">
-          {/* Left: Back Button */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-zinc-600 hover:text-red-600 transition"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            <span className="hidden sm:inline">Back</span>
-          </Link>
-
-          {/* Center: Logo */}
-          <Link href="/">
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-black tracking-tight text-red-600 md:text-3xl">
-              SPOTLIGHT
-            </h1>
-          </Link>
-
-          {/* Right: Nav Links */}
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link href="/upcoming" className="text-red-600">
-              Upcoming
-            </Link>
-            <Link
-              href="/about"
-              className="text-zinc-600 hover:text-red-600 transition"
-            >
-              About
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="pt-20 md:pt-24">
@@ -270,30 +240,6 @@ export default function UpcomingPage() {
                             <span>Directed by {film.director}</span>
                           )}
                         </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="mt-6 flex items-center gap-3">
-                        <button
-                          onClick={() => toggleNotify(film.id)}
-                          className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                            notifyList.includes(film.id)
-                              ? "bg-red-600 text-white"
-                              : "bg-zinc-200 text-zinc-700 hover:bg-zinc-300"
-                          }`}
-                        >
-                          {notifyList.includes(film.id) ? (
-                            <>
-                              <BellOff className="h-4 w-4" />
-                              Notified
-                            </>
-                          ) : (
-                            <>
-                              <Bell className="h-4 w-4" />
-                              Notify Me
-                            </>
-                          )}
-                        </button>
                       </div>
                     </div>
                   </motion.div>
