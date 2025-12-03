@@ -10,7 +10,8 @@ export type Film = {
   genre: string[]; // e.g., ['Action', 'Drama']
   releaseDate: string; // ISO date string
   duration?: number; // Length in minutes
-  rating?: string; // e.g., 'PG-13', 'R'
+  rating?: string; // e.g, 'PG-13', 'R'
   createdAt: string; // When added to your system
   featured?: boolean; // For homepage or featured section
+  status?: "released" | "upcoming" | "coming-soon"; // Film status
 };

@@ -26,8 +26,10 @@ import {
   Menu,
   X,
   Upload,
+  Clock,
 } from "lucide-react";
 import UploadFilm from "@/components/upload-film";
+import UploadUpcoming from "@/components/upload-upcoming";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +48,7 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
 
-type ActiveTab = "dashboard" | "films" | "upload";
+type ActiveTab = "dashboard" | "films" | "upload" | "upcoming";
 
 export default function AdminDashboard() {
   const [allowed, setAllowed] = useState(false);
@@ -320,6 +322,17 @@ export default function AdminDashboard() {
             {sidebarOpen && <span>Films</span>}
           </button>
           <button
+            onClick={() => setActiveTab("upcoming")}
+            className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
+              activeTab === "upcoming"
+                ? "bg-red-600 text-white"
+                : "text-zinc-700 hover:bg-zinc-100"
+            }`}
+          >
+            <Clock className="h-5 w-5" />
+            {sidebarOpen && <span>Upcoming Films</span>}
+          </button>
+          <button
             onClick={() => setActiveTab("upload")}
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "upload"
@@ -374,7 +387,9 @@ export default function AdminDashboard() {
                 ? "Dashboard"
                 : activeTab === "films"
                 ? "Films Management"
-                : "Upload Film"}
+                : activeTab === "upload"
+                ? "Upload Film"
+                : "Add Upcoming Film"}
             </h2>
           </div>
         </header>
@@ -414,13 +429,19 @@ export default function AdminDashboard() {
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-zinc-500">Genres</p>
+                      <p className="text-sm text-zinc-500">Upcoming Films</p>
                       <p className="text-3xl font-bold text-zinc-900">
-                        {genreData.length}
+                        {
+                          films.filter(
+                            (f) =>
+                              f.status === "upcoming" ||
+                              f.status === "coming-soon"
+                          ).length
+                        }
                       </p>
                     </div>
                     <div className="rounded-full bg-red-100 p-3">
-                      <BarChart3 className="h-6 w-6 text-red-600" />
+                      <Clock className="h-6 w-6 text-red-600" />
                     </div>
                   </div>
                 </div>
@@ -635,8 +656,23 @@ export default function AdminDashboard() {
                 </div>
                 <UploadFilm onSuccess={fetchFilms} />
               </div>
+              <div className="space-y-6">
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-zinc-900">
+                      Add Upcoming Film
+                    </h3>
+                    <p className="text-sm text-zinc-500">
+                      Add an upcoming or coming soon film (no video required).
+                    </p>
+                  </div>
+                  <UploadUpcoming onSuccess={fetchFilms} />
+                </div>
+              </div>
             </div>
           )}
+
+          {activeTab === "upcoming" && <div className="space-y-6"></div>}
         </div>
       </main>
 

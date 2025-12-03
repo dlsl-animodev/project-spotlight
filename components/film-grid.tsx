@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
 import Link from "next/link";
@@ -13,12 +13,16 @@ export default function FilmGrid() {
   const [search, setSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const releasedFilms = films.filter(
+    (film) => !film.status || film.status === "released"
+  );
+
   // Filter films based on search query
   const filmsFiltered = searchQuery
     ? films.filter((film) =>
         film.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : films;
+    : releasedFilms;
 
   if (!films || films.length === 0) return null;
 
