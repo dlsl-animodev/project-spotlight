@@ -97,6 +97,7 @@ export default function FilmGrid() {
                       thumbnailKey={film.thumbnailKey}
                       alt={film.title}
                       className="h-full w-full object-cover"
+                      priority={i < 5}
                     />
                   </div>
 

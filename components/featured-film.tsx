@@ -3,34 +3,44 @@
 import { useFilm } from "@/context/film-context";
 import { Play } from "lucide-react";
 import ThumbnailImage from "@/components/thumbnail-image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
+// URL cache for background
+const bgCache = new Map<string, string>();
 
 export default function FeaturedFilm() {
-  const { featuredFilm, handleSelect, loading } = useFilm();
+  const { featuredFilm, loading } = useFilm();
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [bgLoaded, setBgLoaded] = useState(false);
+
+  const fetchBackground = useCallback(async () => {
+    if (!featuredFilm?.coverphotoKey) return;
+
+    // Check cache
+    if (bgCache.has(featuredFilm.coverphotoKey)) {
+      setBackgroundUrl(bgCache.get(featuredFilm.coverphotoKey)!);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/signed-url?key=${encodeURIComponent(featuredFilm.coverphotoKey)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        bgCache.set(featuredFilm.coverphotoKey, data.url);
+        setBackgroundUrl(data.url);
+      }
+    } catch (err) {
+      console.error("background fetch error", err);
+    }
+  }, [featuredFilm?.coverphotoKey]);
 
   useEffect(() => {
-    const fetchBackground = async () => {
-      if (!featuredFilm?.coverphotoKey) return;
-
-      try {
-        const res = await fetch(
-          `/api/signed-url?key=${encodeURIComponent(
-            featuredFilm.coverphotoKey
-          )}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setBackgroundUrl(data.url);
-        }
-      } catch (err) {
-        console.error("background fetch error", err);
-      }
-    };
-
     fetchBackground();
-  }, [featuredFilm?.coverphotoKey]);
+  }, [fetchBackground]);
 
   if (loading)
     return (
@@ -43,12 +53,25 @@ export default function FeaturedFilm() {
 
   return (
     <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-20 text-center md:h-screen md:py-0">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Overlay - using Next.js Image for optimization */}
       {backgroundUrl && (
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${backgroundUrl})` }}
-        >
+        <div className="absolute inset-0">
+          {/* Skeleton while loading */}
+          {!bgLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-zinc-100 to-zinc-200" />
+          )}
+          <Image
+            src={backgroundUrl}
+            alt="Background"
+            fill
+            priority
+            className={`object-cover transition-opacity duration-500 ${
+              bgLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            sizes="100vw"
+            onLoad={() => setBgLoaded(true)}
+          />
+          {/* Overlay */}
           <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
         </div>
       )}
@@ -68,6 +91,7 @@ export default function FeaturedFilm() {
               thumbnailKey={featuredFilm.thumbnailKey}
               alt={featuredFilm.title}
               className="h-full w-full rounded-xl object-cover shadow-2xl"
+              priority
             />
           </div>
 
