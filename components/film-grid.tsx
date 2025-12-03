@@ -109,7 +109,18 @@ export default function FilmGrid() {
                         : "bg-white text-zinc-900"
                     }`}
                   >
-                    <p className="line-clamp-1 text-sm font-medium md:text-base">
+                    <p
+                      className={`line-clamp-1 text-xs md:text-sm ${
+                        isHovered ? "text-white/80" : "text-zinc-500"
+                      }`}
+                    >
+                      {film.genre && film.genre.length > 0
+                        ? film.genre
+                            .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+                            .join(" • ")
+                        : ""}
+                    </p>
+                    <p className="line-clamp-1 text-sm font-semibold md:text-base">
                       {film.title}
                     </p>
                   </div>
