@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const thumbnailFile = formData.get("thumbnail") as File | null;
     const coverphotoFile = formData.get("coverphoto") as File | null;
-    
+
     // At least one file should be provided
     if (!thumbnailFile && !coverphotoFile) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
