@@ -116,6 +116,8 @@ export default function AdminDashboard() {
     }
   }, [allowed, fetchFilms]);
 
+  const upcomingFilms = films.filter((film) => film.status === "upcoming");
+
   // Handle logout
   const handleLogout = async () => {
     await signOut(auth);
@@ -161,6 +163,16 @@ export default function AdminDashboard() {
   const handleUpdateFilm = async () => {
     if (!selectedFilm) return;
     try {
+      // If marking as featured, un-feature all other films first
+      if (formData.featured && !selectedFilm.featured) {
+        const currentFeatured = films.filter(
+          (f) => f.featured && f.id !== selectedFilm.id
+        );
+        for (const film of currentFeatured) {
+          await updateDoc(doc(db, "films", film.id), { featured: false });
+        }
+      }
+
       const filmRef = doc(db, "films", selectedFilm.id);
       await updateDoc(filmRef, {
         title: formData.title,
@@ -389,7 +401,7 @@ export default function AdminDashboard() {
                 ? "Films Management"
                 : activeTab === "upload"
                 ? "Upload Film"
-                : "Add Upcoming Film"}
+                : "Upcoming Films Management"}
             </h2>
           </div>
         </header>
@@ -416,9 +428,9 @@ export default function AdminDashboard() {
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-zinc-500">Featured Films</p>
-                      <p className="text-3xl font-bold text-zinc-900">
-                        {films.filter((f) => f.featured).length}
+                      <p className="text-sm text-zinc-500">Featured Film</p>
+                      <p className="text-lg font-bold text-zinc-900 truncate max-w-[150px]">
+                        {films.find((f) => f.featured)?.title || "None"}
                       </p>
                     </div>
                     <div className="rounded-full bg-red-100 p-3">
@@ -672,7 +684,75 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === "upcoming" && <div className="space-y-6"></div>}
+          {activeTab === "upcoming" && (
+            <div className="space-y-6">
+              <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="border-b border-zinc-200 bg-zinc-50 text-sm text-zinc-600">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">Title</th>
+                        <th className="px-6 py-4 font-medium">Director</th>
+                        <th className="px-6 py-4 font-medium">Genre</th>
+                        <th className="px-6 py-4 font-medium">Duration</th>
+                        <th className="px-6 py-4 font-medium">Rating</th>
+                        <th className="px-6 py-4 font-medium">Featured</th>
+                        <th className="px-6 py-4 font-medium text-right">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {upcomingFilms.map((film) => (
+                        <tr key={film.id} className="text-sm hover:bg-zinc-50">
+                          <td className="px-6 py-4 font-medium text-zinc-900">
+                            {film.title}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600">
+                            {film.director || "-"}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600">
+                            {film.genre?.join(", ") || "-"}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600">
+                            {film.duration || "-"} min
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-600">
+                              {film.rating || "NR"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {film.featured ? (
+                              <Star className="h-5 w-5 fill-red-600 text-red-600" />
+                            ) : (
+                              <Star className="h-5 w-5 text-zinc-300" />
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => openEditDialog(film)}
+                                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => openDeleteDialog(film)}
+                                className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

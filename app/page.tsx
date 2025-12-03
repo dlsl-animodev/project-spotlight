@@ -4,7 +4,7 @@ import FeaturedFilm from "@/components/featured-film";
 import FilmGrid from "@/components/film-grid";
 import VideoModal from "@/components/video-modal";
 import UpcomingFilms from "@/components/upcoming-films";
-import { Search } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -19,11 +19,21 @@ export default function Home() {
             SPOTLIGHT
           </h1>
 
-          {/* Right: Search */}
-          <button
-            className="rounded-full p-2 text-zinc-600 transition hover:bg-zinc-100"
-            aria-label="Search"
-          ></button>
+          {/* Right: Nav Links */}
+          <nav className="flex items-center gap-4 text-sm font-medium">
+            <Link
+              href="/upcoming"
+              className="text-zinc-600 hover:text-red-600 transition"
+            >
+              Upcoming
+            </Link>
+            <Link
+              href="/about"
+              className="text-zinc-600 hover:text-red-600 transition"
+            >
+              About
+            </Link>
+          </nav>
         </div>
       </header>
 
