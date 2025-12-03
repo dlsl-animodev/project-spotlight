@@ -3,6 +3,7 @@
 import FeaturedFilm from "@/components/featured-film";
 import FilmGrid from "@/components/film-grid";
 import VideoModal from "@/components/video-modal";
+import UpcomingFilms from "@/components/upcoming-films";
 import { Search } from "lucide-react";
 
 export default function Home() {
@@ -30,9 +31,8 @@ export default function Home() {
       <main>
         <FeaturedFilm />
         <FilmGrid />
+        <UpcomingFilms />
         <VideoModal />
-
-        <div>upcoming!</div>
       </main>
     </div>
   );
