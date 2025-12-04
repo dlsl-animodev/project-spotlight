@@ -28,6 +28,7 @@ import { Upload, Film } from "lucide-react";
 import { addDoc } from "firebase/firestore";
 import { filmsRef } from "@/libs/collections";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 const filmUploadSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -214,11 +215,11 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
       form.reset();
       setOpen(false);
       setCurrentUpload("");
-      alert("Film uploaded successfully!");
+      toast.success("Film uploaded successfully!");
       onSuccess?.();
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload film. Please try again.");
+      toast.error("Failed to upload film. Please try again.");
     } finally {
       setIsUploading(false);
       setCurrentUpload("");
