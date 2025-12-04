@@ -12,7 +12,7 @@ export default function Navbar() {
 
         {/* Desktop: Center logo */}
         <Link href="/">
-          <h1 className="hidden md:block absolute left-1/2 -translate-x-1/2 text-2xl font-black tracking-tight text-red-600 md:text-3xl">
+          <h1 className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-black tracking-tight text-red-600 md:text-3xl">
             SPOTLIGHT
           </h1>
         </Link>
