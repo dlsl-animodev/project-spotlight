@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Sparkles } from "lucide-react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/libs/firebase";
+import { toast } from "sonner";
 
 const upcomingFilmSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -134,11 +135,11 @@ export default function UploadUpcoming({ onSuccess }: UploadUpcomingProps) {
       // Reset form and close dialog
       form.reset();
       setOpen(false);
-      alert("Upcoming film added successfully!");
+      toast.success("Upcoming film added successfully!");
       onSuccess?.();
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to add upcoming film. Please try again.");
+      toast.error("Failed to add upcoming film. Please try again.");
     } finally {
       setIsUploading(false);
     }
