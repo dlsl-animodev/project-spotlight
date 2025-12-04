@@ -117,7 +117,9 @@ export default function UpcomingFilms() {
                 </span>
                 <span className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1.5 text-sm font-bold text-white">
                   <Calendar className="h-4 w-4" />
-                  {getDaysUntil(main.releaseDate)} days
+                  {getDaysUntil(main.releaseDate) > 0
+                    ? `${getDaysUntil(main.releaseDate)} days`
+                    : "Coming Soon"}
                 </span>
               </div>
 
@@ -204,7 +206,9 @@ export default function UpcomingFilms() {
                     ))}
                   </div>
                   <span className="rounded-full bg-red-600/80 px-2.5 py-1 text-xs font-bold text-white">
-                    {getDaysUntil(film.releaseDate)}d
+                    {getDaysUntil(film.releaseDate) > 0
+                      ? `${getDaysUntil(film.releaseDate)}d`
+                      : "Soon"}
                   </span>
                 </div>
 
