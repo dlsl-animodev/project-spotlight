@@ -140,6 +140,38 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
       setIsUploading(true);
       setUploadProgress({ video: 0, thumbnail: 0, coverphoto: 0 });
 
+      // Check storage limit before uploading
+      setCurrentUpload("Checking storage...");
+      const statsResponse = await fetch("/api/bucket-stats");
+      if (statsResponse.ok) {
+        const stats = await statsResponse.json();
+
+        // Calculate total upload size
+        const totalUploadSize =
+          (data.file.size + data.thumbnail.size + data.coverphoto.size) /
+          (1024 * 1024 * 1024); // in GB
+
+        if (stats.isOverLimit) {
+          toast.error("Storage limit exceeded! Cannot upload more files.");
+          return;
+        }
+
+        if (stats.remainingGB < totalUploadSize) {
+          toast.error(
+            `Not enough storage! Need ${totalUploadSize.toFixed(
+              2
+            )}GB but only ${stats.remainingGB.toFixed(2)}GB remaining.`
+          );
+          return;
+        }
+
+        if (stats.usagePercentage > 90) {
+          toast.warning(
+            `Storage almost full! ${stats.usagePercentage.toFixed(1)}% used.`
+          );
+        }
+      }
+
       const sanitizedTitle = data.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
