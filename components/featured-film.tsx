@@ -15,6 +15,7 @@ export default function FeaturedFilm() {
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [bgLoaded, setBgLoaded] = useState(false);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const fetchBackground = useCallback(async () => {
     if (!featuredFilm?.coverphotoKey) return;
 

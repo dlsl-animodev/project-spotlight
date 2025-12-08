@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import UploadFilm from "@/components/upload-film";
 import UploadUpcoming from "@/components/upload-upcoming";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -225,24 +226,35 @@ export default function AdminDashboard() {
   const handleDeleteFilm = async () => {
     if (!selectedFilm) return;
     try {
+      // Delete from Firestore
       await deleteDoc(doc(db, "films", selectedFilm.id));
+
+      // Delete files from R2
+      const deleteResponse = await fetch("/api/delete-files", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          videoKey: selectedFilm.key,
+          thumbnailKey: selectedFilm.thumbnailKey,
+          coverphotoKey: selectedFilm.coverphotoKey,
+        }),
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error("Failed to delete files from R2");
+      }
+
       setIsDeleteDialogOpen(false);
       setSelectedFilm(null);
       fetchFilms();
+      fetchBucketStats();
+      toast.success(`"${selectedFilm.title}" deleted successfully`);
     } catch (error) {
       console.error("Error deleting film:", error);
+      toast.error("Failed to delete film. Please try again.");
     }
-
-    await fetch("/api/delete-files", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        videoKey: selectedFilm?.key,
-        thumbnailKey: selectedFilm?.thumbnailKey,
-      }),
-    });
   };
 
   // Chart data

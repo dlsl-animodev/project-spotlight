@@ -4,9 +4,11 @@ import client from "@/libs/s3";
 
 export async function POST(request: NextRequest) {
   try {
-    const { videoKey, thumbnailKey } = await request.json();
+    const { videoKey, thumbnailKey, coverphotoKey } = await request.json();
 
-    if (!videoKey && !thumbnailKey) {
+    console.log("Deleting files:", { videoKey, thumbnailKey, coverphotoKey });
+
+    if (!videoKey && !thumbnailKey && !coverphotoKey) {
       return NextResponse.json({ error: "No keys provided" }, { status: 400 });
     }
 
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest) {
       deletePromises.push(
         client.send(
           new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME!,
+            Bucket: process.env.R2_BUCKET!,
             Key: videoKey,
           })
         )
@@ -29,14 +31,28 @@ export async function POST(request: NextRequest) {
       deletePromises.push(
         client.send(
           new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME!,
+            Bucket: process.env.R2_BUCKET!,
             Key: thumbnailKey,
           })
         )
       );
     }
 
+    // Delete cover photo file
+    if (coverphotoKey) {
+      deletePromises.push(
+        client.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.R2_BUCKET!,
+            Key: coverphotoKey,
+          })
+        )
+      );
+    }
+
     await Promise.all(deletePromises);
+
+    console.log("Successfully deleted files from R2");
 
     return NextResponse.json({ success: true });
   } catch (error) {
