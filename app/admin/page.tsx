@@ -56,6 +56,14 @@ export default function AdminDashboard() {
   const [films, setFilms] = useState<Film[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [bucketStats, setBucketStats] = useState<{
+    totalSizeGB: number;
+    usagePercentage: number;
+    remainingGB: number;
+    totalObjects: number;
+    isNearLimit: boolean;
+    isOverLimit: boolean;
+  } | null>(null);
 
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -113,8 +121,22 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (allowed) {
       fetchFilms();
+      fetchBucketStats();
     }
   }, [allowed, fetchFilms]);
+
+  // Fetch bucket stats
+  const fetchBucketStats = async () => {
+    try {
+      const response = await fetch("/api/bucket-stats");
+      if (response.ok) {
+        const stats = await response.json();
+        setBucketStats(stats);
+      }
+    } catch (error) {
+      console.error("Error fetching bucket stats:", error);
+    }
+  };
 
   const upcomingFilms = films.filter((film) => film.status === "upcoming");
 
@@ -411,7 +433,56 @@ export default function AdminDashboard() {
           {activeTab === "dashboard" && (
             <div className="space-y-6">
               {/* Stats Cards */}
+
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div className={`rounded-xl border p-6 shadow-sm ${
+                  bucketStats?.isOverLimit
+                    ? "border-red-300 bg-red-50"
+                    : bucketStats?.isNearLimit
+                    ? "border-yellow-300 bg-yellow-50"
+                    : "border-zinc-200 bg-white"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-zinc-500">Storage Used</p>
+                      <p className="text-2xl font-bold text-zinc-900">
+                        {bucketStats ? `${bucketStats.totalSizeGB.toFixed(2)}` : "..."} GB
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">
+                        {bucketStats ? `${bucketStats.remainingGB.toFixed(2)}` : "..."} GB remaining
+                      </p>
+                      {bucketStats && (
+                        <div className="mt-2 h-2 w-full rounded-full bg-zinc-200">
+                          <div
+                            className={`h-full rounded-full ${
+                              bucketStats.isOverLimit
+                                ? "bg-red-600"
+                                : bucketStats.isNearLimit
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            }`}
+                            style={{ width: `${Math.min(bucketStats.usagePercentage, 100)}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className={`rounded-full p-3 ${
+                      bucketStats?.isOverLimit
+                        ? "bg-red-200"
+                        : bucketStats?.isNearLimit
+                        ? "bg-yellow-200"
+                        : "bg-red-100"
+                    }`}>
+                      <BarChart3 className={`h-6 w-6 ${
+                        bucketStats?.isOverLimit
+                          ? "text-red-700"
+                          : bucketStats?.isNearLimit
+                          ? "text-yellow-700"
+                          : "text-red-600"
+                      }`} />
+                    </div>
+                  </div>
+                </div>
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -454,29 +525,6 @@ export default function AdminDashboard() {
                     </div>
                     <div className="rounded-full bg-red-100 p-3">
                       <Clock className="h-6 w-6 text-red-600" />
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-zinc-500">Avg Duration</p>
-                      <p className="text-3xl font-bold text-zinc-900">
-                        {films.length > 0
-                          ? Math.round(
-                              films.reduce(
-                                (acc, f) => acc + (f.duration || 0),
-                                0
-                              ) / films.filter((f) => f.duration).length || 0
-                            )
-                          : 0}{" "}
-                        <span className="text-lg font-normal text-zinc-500">
-                          min
-                        </span>
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-red-100 p-3">
-                      <Eye className="h-6 w-6 text-red-600" />
                     </div>
                   </div>
                 </div>
