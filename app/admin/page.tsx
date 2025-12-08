@@ -458,14 +458,37 @@ export default function AdminDashboard() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-sm text-zinc-500">Storage Used</p>
-                      <p className="text-2xl font-bold text-zinc-900">
+                      <div className="flex justify-center mb-2">
+                        <div
+                          className={`rounded-full p-3 ${
+                            bucketStats?.isOverLimit
+                              ? "bg-red-200"
+                              : bucketStats?.isNearLimit
+                              ? "bg-yellow-200"
+                              : "bg-red-100"
+                          }`}
+                        >
+                          <BarChart3
+                            className={`h-6 w-6 ${
+                              bucketStats?.isOverLimit
+                                ? "text-red-700"
+                                : bucketStats?.isNearLimit
+                                ? "text-yellow-700"
+                                : "text-red-600"
+                            }`}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-sm text-zinc-500 text-center">
+                        Storage Used
+                      </p>
+                      <p className="text-2xl font-bold text-zinc-900 text-center">
                         {bucketStats
                           ? `${bucketStats.totalSizeGB.toFixed(2)}`
                           : "..."}{" "}
                         GB
                       </p>
-                      <p className="text-xs text-zinc-500 mt-1">
+                      <p className="text-xs text-zinc-500 mt-1 text-center">
                         {bucketStats
                           ? `${bucketStats.remainingGB.toFixed(2)}`
                           : "..."}{" "}
@@ -491,70 +514,51 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </div>
-                    <div
-                      className={`rounded-full p-3 ${
-                        bucketStats?.isOverLimit
-                          ? "bg-red-200"
-                          : bucketStats?.isNearLimit
-                          ? "bg-yellow-200"
-                          : "bg-red-100"
-                      }`}
-                    >
-                      <BarChart3
-                        className={`h-6 w-6 ${
-                          bucketStats?.isOverLimit
-                            ? "text-red-700"
-                            : bucketStats?.isNearLimit
-                            ? "text-yellow-700"
-                            : "text-red-600"
-                        }`}
-                      />
-                    </div>
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-zinc-500">Total Films</p>
-                      <p className="text-3xl font-bold text-zinc-900">
-                        {films.length}
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-red-100 p-3">
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="rounded-full bg-red-100 p-3 mb-3">
                       <FilmIcon className="h-6 w-6 text-red-600" />
                     </div>
+                    <p className="text-sm text-zinc-500 text-center">
+                      Released Films
+                    </p>
+                    <p className="text-3xl font-bold text-zinc-900 text-center">
+                      {films.filter((f) => f.status === "released").length}
+                    </p>
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-zinc-500">Featured Film</p>
-                      <p className="text-lg font-bold text-zinc-900 truncate max-w-[150px]">
-                        {films.find((f) => f.featured)?.title || "None"}
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-red-100 p-3">
-                      <Star className="h-6 w-6 text-red-600" />
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-zinc-500">Upcoming Films</p>
-                      <p className="text-3xl font-bold text-zinc-900">
-                        {
-                          films.filter(
-                            (f) =>
-                              f.status === "upcoming" ||
-                              f.status === "coming-soon"
-                          ).length
-                        }
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-red-100 p-3">
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="rounded-full bg-red-100 p-3 mb-3">
                       <Clock className="h-6 w-6 text-red-600" />
                     </div>
+                    <p className="text-sm text-zinc-500 text-center">
+                      Upcoming Films
+                    </p>
+                    <p className="text-3xl font-bold text-zinc-900 text-center">
+                      {
+                        films.filter(
+                          (f) =>
+                            f.status === "upcoming" ||
+                            f.status === "coming-soon"
+                        ).length
+                      }
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="rounded-full bg-red-100 p-3 mb-3">
+                      <Star className="h-6 w-6 text-red-600" />
+                    </div>
+                    <p className="text-sm text-zinc-500 text-center">
+                      Featured Film
+                    </p>
+                    <p className="text-lg font-bold text-zinc-900 text-center truncate max-w-[150px]">
+                      {films.find((f) => f.featured)?.title || "None"}
+                    </p>
                   </div>
                 </div>
               </div>
