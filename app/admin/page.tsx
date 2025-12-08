@@ -435,21 +435,29 @@ export default function AdminDashboard() {
               {/* Stats Cards */}
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div className={`rounded-xl border p-6 shadow-sm ${
-                  bucketStats?.isOverLimit
-                    ? "border-red-300 bg-red-50"
-                    : bucketStats?.isNearLimit
-                    ? "border-yellow-300 bg-yellow-50"
-                    : "border-zinc-200 bg-white"
-                }`}>
+                <div
+                  className={`rounded-xl border p-6 shadow-sm ${
+                    bucketStats?.isOverLimit
+                      ? "border-red-300 bg-red-50"
+                      : bucketStats?.isNearLimit
+                      ? "border-yellow-300 bg-yellow-50"
+                      : "border-zinc-200 bg-white"
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <p className="text-sm text-zinc-500">Storage Used</p>
                       <p className="text-2xl font-bold text-zinc-900">
-                        {bucketStats ? `${bucketStats.totalSizeGB.toFixed(2)}` : "..."} GB
+                        {bucketStats
+                          ? `${bucketStats.totalSizeGB.toFixed(2)}`
+                          : "..."}{" "}
+                        GB
                       </p>
                       <p className="text-xs text-zinc-500 mt-1">
-                        {bucketStats ? `${bucketStats.remainingGB.toFixed(2)}` : "..."} GB remaining
+                        {bucketStats
+                          ? `${bucketStats.remainingGB.toFixed(2)}`
+                          : "..."}{" "}
+                        GB remaining
                       </p>
                       {bucketStats && (
                         <div className="mt-2 h-2 w-full rounded-full bg-zinc-200">
@@ -461,25 +469,34 @@ export default function AdminDashboard() {
                                 ? "bg-yellow-500"
                                 : "bg-green-500"
                             }`}
-                            style={{ width: `${Math.min(bucketStats.usagePercentage, 100)}%` }}
+                            style={{
+                              width: `${Math.min(
+                                bucketStats.usagePercentage,
+                                100
+                              )}%`,
+                            }}
                           />
                         </div>
                       )}
                     </div>
-                    <div className={`rounded-full p-3 ${
-                      bucketStats?.isOverLimit
-                        ? "bg-red-200"
-                        : bucketStats?.isNearLimit
-                        ? "bg-yellow-200"
-                        : "bg-red-100"
-                    }`}>
-                      <BarChart3 className={`h-6 w-6 ${
+                    <div
+                      className={`rounded-full p-3 ${
                         bucketStats?.isOverLimit
-                          ? "text-red-700"
+                          ? "bg-red-200"
                           : bucketStats?.isNearLimit
-                          ? "text-yellow-700"
-                          : "text-red-600"
-                      }`} />
+                          ? "bg-yellow-200"
+                          : "bg-red-100"
+                      }`}
+                    >
+                      <BarChart3
+                        className={`h-6 w-6 ${
+                          bucketStats?.isOverLimit
+                            ? "text-red-700"
+                            : bucketStats?.isNearLimit
+                            ? "text-yellow-700"
+                            : "text-red-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 </div>
