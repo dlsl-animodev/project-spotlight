@@ -1,4 +1,25 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getDocs, query, orderBy, limit } from "firebase/firestore";
+import { announcementsRef } from "@/libs/collections";
+import { Announcement } from "@/type/film-type";
+
+export async function fetchAnnouncements() {
+  try {
+    const q = query(announcementsRef, orderBy("createdAt", "desc"), limit(1));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { ...doc.data(), id: doc.id } as Announcement;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching announcements:", error);
+    return null;
+  }
+}
 
 export default function Navbar() {
   return (
@@ -32,6 +53,39 @@ export default function Navbar() {
           </Link>
         </nav>
       </div>
+      <Announcements />
     </header>
+  );
+}
+
+function Announcements() {
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+
+  const loadAnnouncement = async () => {
+    const latest = await fetchAnnouncements();
+    setAnnouncement(latest);
+  };
+
+  useEffect(() => {
+    loadAnnouncement();
+
+    // Listen for custom event when announcement is added
+    const handleAnnouncementAdded = () => {
+      loadAnnouncement();
+    };
+
+    window.addEventListener("announcementAdded", handleAnnouncementAdded);
+
+    return () => {
+      window.removeEventListener("announcementAdded", handleAnnouncementAdded);
+    };
+  }, []);
+
+  if (!announcement) return null;
+
+  return (
+    <div className="bg-red-600 text-white text-center">
+      <p className="text-sm md:text-base">{announcement.message}</p>
+    </div>
   );
 }

@@ -15,3 +15,8 @@ export type Film = {
   featured?: boolean; // For homepage or featured section
   status?: "released" | "upcoming" | "coming-soon"; // Film status
 };
+
+export type Announcement = {
+  message: string; // Announcement message
+  createdAt: Date; // When the announcement was created
+};
