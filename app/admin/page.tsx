@@ -48,6 +48,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
+import Link from "next/link";
 
 type ActiveTab = "dashboard" | "films" | "upload" | "upcoming";
 
@@ -327,7 +328,10 @@ export default function AdminDashboard() {
         } md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"} w-64`}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-4">
+        <Link
+          href="/"
+          className="flex h-16 items-center justify-between border-b border-zinc-200 px-4"
+        >
           {sidebarOpen && (
             <h1 className="text-xl font-bold text-red-600">SPOTLIGHT</h1>
           )}
@@ -341,7 +345,7 @@ export default function AdminDashboard() {
               <Menu className="h-5 w-5" />
             )}
           </button>
-        </div>
+        </Link>
 
         {/* Nav Items */}
         <nav className="mt-6 px-3">

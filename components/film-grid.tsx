@@ -17,11 +17,15 @@ export default function FilmGrid() {
     (film) => !film.status || film.status === "released"
   );
 
-  // Filter films based on search query
   const filmsFiltered = searchQuery
-    ? films.filter((film) =>
-        film.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? films.filter((film) => {
+        const q = searchQuery.toLowerCase();
+
+        return (
+          film.title.toLowerCase().includes(q) ||
+          film.genre?.some((g) => g.toLowerCase().includes(q))
+        );
+      })
     : releasedFilms;
 
   if (!films || films.length === 0) return null;
@@ -46,7 +50,7 @@ export default function FilmGrid() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search films..."
+                placeholder="Search films or genres..."
                 className="w-40 rounded-md border border-gray-300 px-3 py-1 sm:w-56"
                 autoFocus
               />
