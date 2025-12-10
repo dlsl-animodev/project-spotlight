@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/libs/firebase";
@@ -14,6 +14,8 @@ import {
   Users,
   Clapperboard,
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 import { motion } from "framer-motion";
 import VideoPlayer from "@/components/video-player";
 
@@ -26,6 +28,7 @@ export default function FilmDetailPage() {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showPoster, setShowPoster] = useState(false);
 
   // Fetch film data
   useEffect(() => {
@@ -144,8 +147,8 @@ export default function FilmDetailPage() {
             )}
 
             {/* Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/80 via-transparent to-zinc-900/40" />
+            <div className="absolute inset-0 bg-linear-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-zinc-900/80 via-transparent to-zinc-900/40" />
 
             {/* Back Button */}
             <motion.button
@@ -169,7 +172,10 @@ export default function FilmDetailPage() {
                   className="hidden shrink-0 md:block"
                 >
                   {thumbnailUrl && (
-                    <div className="relative overflow-hidden rounded-xl shadow-2xl ring-4 ring-white/20">
+                    <div
+                      className="relative overflow-hidden rounded-xl shadow-2xl ring-4 ring-white/20 hover:cursor-pointer"
+                      onClick={() => setShowPoster(!showPoster)}
+                    >
                       <img
                         src={thumbnailUrl}
                         alt={film.title}
@@ -316,6 +322,37 @@ export default function FilmDetailPage() {
           </div>
         </>
       )}
+      {thumbnailUrl && (
+        <ShowPoster
+          thumbnail={thumbnailUrl}
+          open={showPoster}
+          onOpenChange={setShowPoster}
+        />
+      )}{" "}
     </div>
+  );
+}
+
+function ShowPoster({
+  thumbnail,
+  open,
+  onOpenChange,
+}: {
+  thumbnail: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-full w-full h-full p-0 bg-black">
+        <div className="w-full h-full flex items-center justify-center">
+          <img
+            src={thumbnail}
+            alt="Poster"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
