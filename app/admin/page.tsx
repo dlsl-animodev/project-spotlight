@@ -49,8 +49,15 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
 import Link from "next/link";
+import UploadAnnouncements from "@/components/upload-announcements";
+import { fetchAnnouncements } from "@/components/navbar";
 
-type ActiveTab = "dashboard" | "films" | "upload" | "upcoming";
+type ActiveTab =
+  | "dashboard"
+  | "films"
+  | "upload"
+  | "upcoming"
+  | "announcements";
 
 export default function AdminDashboard() {
   const [allowed, setAllowed] = useState(false);
@@ -392,6 +399,17 @@ export default function AdminDashboard() {
           >
             <Upload className="h-5 w-5" />
             {sidebarOpen && <span>Upload Film</span>}
+          </button>
+          <button
+            onClick={() => setActiveTab("announcements")}
+            className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
+              activeTab === "announcements"
+                ? "bg-red-600 text-white"
+                : "text-zinc-700 hover:bg-zinc-100"
+            }`}
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            {sidebarOpen && <span>Announcements</span>}
           </button>
         </nav>
 
@@ -835,6 +853,22 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "announcements" && (
+            <div className="space-y-6">
+              <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-zinc-900">
+                    Add Announcements
+                  </h3>
+                  <p className="text-sm text-zinc-500">
+                    Add Announcements to the homepage
+                  </p>
+                </div>
+                <UploadAnnouncements onSuccess={fetchAnnouncements} />
               </div>
             </div>
           )}

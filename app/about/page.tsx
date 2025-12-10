@@ -8,9 +8,6 @@ import Link from "next/link";
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <Navbar />
-
       {/* Main Content */}
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}

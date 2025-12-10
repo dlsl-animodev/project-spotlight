@@ -24,10 +24,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload, Sparkles } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Upload, Sparkles, CalendarIcon } from "lucide-react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/libs/firebase";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const upcomingFilmSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -35,7 +43,7 @@ const upcomingFilmSchema = z.object({
   actors: z.string().optional(),
   director: z.string().optional(),
   genre: z.string().min(1, "At least one genre is required"),
-  releaseDate: z.string().min(1, "Release date is required"),
+  releaseDate: z.date(),
   duration: z.string().optional(),
   rating: z.string().optional(),
   featured: z.boolean().optional(),
@@ -61,7 +69,6 @@ export default function UploadUpcoming({ onSuccess }: UploadUpcomingProps) {
       actors: "",
       director: "",
       genre: "",
-      releaseDate: "",
       duration: "",
       rating: "",
       featured: false,
@@ -120,7 +127,7 @@ export default function UploadUpcoming({ onSuccess }: UploadUpcomingProps) {
         actors: actorsArray,
         director: data.director || "",
         genre: genreArray,
-        releaseDate: data.releaseDate,
+        releaseDate: data.releaseDate.toISOString(),
         duration: data.duration ? Number(data.duration) : undefined,
         rating: data.rating,
         featured: data.featured,
@@ -258,7 +265,32 @@ export default function UploadUpcoming({ onSuccess }: UploadUpcomingProps) {
                   <FormItem>
                     <FormLabel>Expected Release Date *</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick expected release date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
