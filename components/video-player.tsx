@@ -367,6 +367,8 @@ export default function VideoPlayer({
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
+        controlsList="nodownload"
+        onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Loading Spinner */}
