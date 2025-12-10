@@ -28,9 +28,10 @@ export async function fetchAnnouncements() {
 
     snapshot.docs.forEach((docSnapshot) => {
       const data = docSnapshot.data() as Announcement;
-      const expiresAt = data.expiresAt?.toDate
-        ? data.expiresAt.toDate()
-        : new Date(data.expiresAt);
+      const expiresAt =
+        data.expiresAt instanceof Date
+          ? data.expiresAt
+          : (data.expiresAt as any)?.toDate?.() || new Date(data.expiresAt);
 
       if (expiresAt <= now) {
         // Delete expired announcement

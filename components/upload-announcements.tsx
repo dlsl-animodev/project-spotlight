@@ -33,9 +33,7 @@ interface UploadFilmProps {
 
 const announcementSchema = z.object({
   message: z.string().min(1, "Announcement cannot be empty"),
-  expiresAt: z.date({
-    required_error: "Expiration date is required",
-  }),
+  expiresAt: z.date(),
 });
 
 type AnnouncementData = z.infer<typeof announcementSchema>;
