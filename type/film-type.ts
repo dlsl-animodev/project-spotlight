@@ -17,6 +17,8 @@ export type Film = {
 };
 
 export type Announcement = {
+  id?: string; // Document ID
   message: string; // Announcement message
   createdAt: Date; // When the announcement was created
+  expiresAt: Date; // When the announcement expires
 };

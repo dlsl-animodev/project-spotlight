@@ -1,20 +1,55 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getDocs, query, orderBy, limit } from "firebase/firestore";
+import {
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { announcementsRef } from "@/libs/collections";
 import { Announcement } from "@/type/film-type";
+import { db } from "@/libs/firebase";
 
 export async function fetchAnnouncements() {
   try {
-    const q = query(announcementsRef, orderBy("createdAt", "desc"), limit(1));
+    const now = new Date();
+
+    // Get all announcements
+    const q = query(announcementsRef, orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      return { ...doc.data(), id: doc.id } as Announcement;
+    // Delete expired announcements
+    const deletePromises: Promise<void>[] = [];
+    let latestValid: Announcement | null = null;
+
+    snapshot.docs.forEach((docSnapshot) => {
+      const data = docSnapshot.data() as Announcement;
+      const expiresAt = data.expiresAt?.toDate
+        ? data.expiresAt.toDate()
+        : new Date(data.expiresAt);
+
+      if (expiresAt <= now) {
+        // Delete expired announcement
+        deletePromises.push(
+          deleteDoc(doc(db, "announcements", docSnapshot.id))
+        );
+      } else if (!latestValid) {
+        // Keep the first non-expired announcement
+        latestValid = { ...data, id: docSnapshot.id };
+      }
+    });
+
+    // Execute all deletions
+    if (deletePromises.length > 0) {
+      await Promise.all(deletePromises);
+      console.log(`Deleted ${deletePromises.length} expired announcement(s)`);
     }
-    return null;
+
+    return latestValid;
   } catch (error) {
     console.error("Error fetching announcements:", error);
     return null;
