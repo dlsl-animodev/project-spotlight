@@ -10,7 +10,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <Navbar />
 
       {/* Main Content */}
       <main>

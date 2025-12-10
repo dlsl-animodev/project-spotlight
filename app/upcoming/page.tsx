@@ -76,21 +76,12 @@ export default function UpcomingPage() {
     fetchUpcoming();
   }, []);
 
-  const toggleNotify = (id: string) => {
-    setNotifyList((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <Navbar />
-
       {/* Main Content */}
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-16 md:py-24">
+        <section className="relative overflow-hidden bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-16 md:py-24">
           {/* Animated Background */}
           <div className="absolute inset-0">
             <div className="absolute -right-20 top-0 h-72 w-72 rounded-full bg-red-600/20 blur-3xl" />
@@ -178,7 +169,7 @@ export default function UpcomingPage() {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-full min-h-[240px] w-full items-center justify-center bg-gradient-to-br from-red-600 to-red-700">
+                        <div className="flex h-full min-h-60 w-full items-center justify-center bg-linear-to-br from-red-600 to-red-700">
                           <Sparkles className="h-16 w-16 text-white/50" />
                         </div>
                       )}
