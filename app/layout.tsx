@@ -4,6 +4,7 @@ import "./globals.css";
 import { FilmProvider } from "@/context/film-context";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/navbar";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <FilmProvider>
           <Navbar />
           {children}
+          <Analytics />
         </FilmProvider>
         <Toaster richColors position="top-center" />
       </body>
