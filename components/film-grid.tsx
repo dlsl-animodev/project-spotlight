@@ -30,12 +30,12 @@ export default function FilmGrid() {
   if (!films || films.length === 0) return null;
 
   return (
-    <section className="relative bg-zinc-100 py-8 md:py-12">
+    <section className="relative bg-zinc-100 dark:bg-zinc-900 py-8 md:py-12 transition-colors">
       {/* Section Header */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-12 md:mb-16">
           <div className="flex items-center justify-center gap-3">
-            <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 md:text-5xl lg:text-6xl">
+            <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white md:text-5xl lg:text-6xl">
               More from{" "}
               <span className="text-white bg-red-600">Film Society</span>
             </h2>
@@ -58,7 +58,7 @@ export default function FilmGrid() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search films or genres..."
-                  className="h-11 w-full rounded-full border-zinc-300 bg-white px-5 text-base shadow-sm transition-shadow focus:border-zinc-400 focus:shadow-md focus:outline-none focus:ring-0"
+                  className="h-11 w-full rounded-full border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-white px-5 text-base shadow-sm transition-shadow focus:border-zinc-400 dark:focus:border-zinc-600 focus:shadow-md focus:outline-none focus:ring-0"
                   autoFocus
                 />
               </div>
@@ -114,12 +114,12 @@ export default function FilmGrid() {
                     className={`p-3 transition-colors duration-300 md:p-4 ${
                       isHovered
                         ? "bg-red-600 text-white"
-                        : "bg-white text-zinc-900"
+                        : "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
                     }`}
                   >
                     <p
                       className={`line-clamp-1 text-xs md:text-sm ${
-                        isHovered ? "text-white/80" : "text-zinc-500"
+                        isHovered ? "text-white/80" : "text-zinc-500 dark:text-zinc-400"
                       }`}
                     >
                       {film.genre && film.genre.length > 0

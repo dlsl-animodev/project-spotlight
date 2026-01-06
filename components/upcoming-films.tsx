@@ -67,7 +67,7 @@ export default function UpcomingFilms() {
 
   if (loading) {
     return (
-      <section className="bg-zinc-100 py-12 md:py-16">
+      <section className="bg-zinc-100 dark:bg-zinc-900 py-12 md:py-16 transition-colors">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
@@ -84,7 +84,7 @@ export default function UpcomingFilms() {
   const secondary = rest.slice(0, 3);
 
   return (
-    <section className="bg-zinc-100 py-12 md:py-16">
+    <section className="bg-zinc-100 dark:bg-zinc-900 py-12 md:py-16 transition-colors">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         {/* Section Header */}
         <div className="mb-8 flex items-center gap-3">

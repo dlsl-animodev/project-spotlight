@@ -23,8 +23,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border border-red-300 bg-white p-6 shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950 px-4 transition-colors">
+      <div className="w-full max-w-sm space-y-6 rounded-xl border border-red-300 dark:border-red-800 bg-white dark:bg-zinc-900 p-6 shadow-md">
         <h2 className="text-center text-2xl font-bold text-red-600">
           Film Society Admin Login
         </h2>
@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
           <Input
             type="email"
             placeholder="Email"
-            className="border-red-300 focus-visible:ring-red-500"
+            className="border-red-300 dark:border-red-800 dark:bg-zinc-800 dark:text-white focus-visible:ring-red-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
           <Input
             type="password"
             placeholder="Password"
-            className="border-red-300 focus-visible:ring-red-500"
+            className="border-red-300 dark:border-red-800 dark:bg-zinc-800 dark:text-white focus-visible:ring-red-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
