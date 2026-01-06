@@ -10,7 +10,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { Film } from "@/type/film-type";
+import { Film, Announcement } from "@/type/film-type";
 import {
   LayoutDashboard,
   Film as FilmIcon,
@@ -29,6 +29,7 @@ import {
   Globe,
   Monitor,
   RefreshCw,
+  Megaphone,
 } from "lucide-react";
 import UploadFilm from "@/components/upload-film";
 import UploadUpcoming from "@/components/upload-upcoming";
@@ -87,6 +88,12 @@ export default function AdminDashboard() {
     isOverLimit: boolean;
   } | null>(null);
 
+  // Announcement state
+  const [currentAnnouncement, setCurrentAnnouncement] =
+    useState<Announcement | null>(null);
+  const [isEditAnnouncementOpen, setIsEditAnnouncementOpen] = useState(false);
+  const [editAnnouncementMessage, setEditAnnouncementMessage] = useState("");
+
   // Dialog states
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -139,12 +146,19 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  // Fetch current announcement
+  const loadCurrentAnnouncement = useCallback(async () => {
+    const announcement = await fetchAnnouncements();
+    setCurrentAnnouncement(announcement);
+  }, []);
+
   useEffect(() => {
     if (allowed) {
       fetchFilms();
       fetchBucketStats();
+      loadCurrentAnnouncement();
     }
-  }, [allowed, fetchFilms]);
+  }, [allowed, fetchFilms, loadCurrentAnnouncement]);
 
   // Fetch bucket stats
   const fetchBucketStats = async () => {
@@ -275,6 +289,59 @@ export default function AdminDashboard() {
       console.error("Error deleting film:", error);
       toast.error("Failed to delete film. Please try again.");
     }
+  };
+
+  // Announcement handlers
+  const handleDeleteAnnouncement = async () => {
+    if (!currentAnnouncement?.id) return;
+    try {
+      await deleteDoc(doc(db, "announcements", currentAnnouncement.id));
+      setCurrentAnnouncement(null);
+      window.dispatchEvent(new CustomEvent("announcementAdded"));
+      toast.success("Announcement deleted successfully");
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      toast.error("Failed to delete announcement");
+    }
+  };
+
+  const handleEditAnnouncement = async () => {
+    if (!currentAnnouncement?.id || !editAnnouncementMessage.trim()) return;
+    try {
+      await updateDoc(doc(db, "announcements", currentAnnouncement.id), {
+        message: editAnnouncementMessage,
+      });
+      setCurrentAnnouncement({
+        ...currentAnnouncement,
+        message: editAnnouncementMessage,
+      });
+      setIsEditAnnouncementOpen(false);
+      window.dispatchEvent(new CustomEvent("announcementAdded"));
+      toast.success("Announcement updated successfully");
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      toast.error("Failed to update announcement");
+    }
+  };
+
+  const getTimeUntilExpiration = (expiresAt: Date) => {
+    const now = new Date();
+    const expiry =
+      expiresAt instanceof Date
+        ? expiresAt
+        : (expiresAt as { toDate?: () => Date })?.toDate?.() ||
+          new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+
+    if (diff <= 0) return "Expired";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) return `${days}d ${hours}h remaining`;
+    if (hours > 0) return `${hours}h ${minutes}m remaining`;
+    return `${minutes}m remaining`;
   };
 
   // Chart data
@@ -881,17 +948,128 @@ export default function AdminDashboard() {
 
           {activeTab === "announcements" && (
             <div className="space-y-6">
+              {/* Current Announcement */}
+              {currentAnnouncement && (
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Megaphone className="h-5 w-5 text-red-600" />
+                        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                          Current Announcement
+                        </h3>
+                      </div>
+                      <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-3">
+                        <p className="text-zinc-900 dark:text-white font-medium">
+                          {currentAnnouncement.message}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                        <span
+                          className={`font-medium ${
+                            getTimeUntilExpiration(
+                              currentAnnouncement.expiresAt
+                            ) === "Expired"
+                              ? "text-red-600"
+                              : "text-zinc-600 dark:text-zinc-300"
+                          }`}
+                        >
+                          {getTimeUntilExpiration(
+                            currentAnnouncement.expiresAt
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditAnnouncementMessage(
+                            currentAnnouncement.message
+                          );
+                          setIsEditAnnouncementOpen(true);
+                        }}
+                        className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={handleDeleteAnnouncement}
+                        className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* No Announcement */}
+              {!currentAnnouncement && (
+                <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800/50 p-8 text-center">
+                  <Megaphone className="h-10 w-10 text-zinc-400 mx-auto mb-3" />
+                  <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+                    No active announcement
+                  </p>
+                  <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
+                    Create one below to display on the homepage
+                  </p>
+                </div>
+              )}
+
+              {/* Add Announcement */}
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                    Add Announcements
+                    Add New Announcement
                   </h3>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Add Announcements to the homepage
+                    Add a new announcement to the homepage
                   </p>
                 </div>
-                <UploadAnnouncements onSuccess={fetchAnnouncements} />
+                <UploadAnnouncements onSuccess={loadCurrentAnnouncement} />
               </div>
+
+              {/* Edit Announcement Dialog */}
+              <Dialog
+                open={isEditAnnouncementOpen}
+                onOpenChange={setIsEditAnnouncementOpen}
+              >
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-red-600">
+                      Edit Announcement
+                    </DialogTitle>
+                    <DialogDescription>
+                      Update the announcement message below.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <Textarea
+                      value={editAnnouncementMessage}
+                      onChange={(e) =>
+                        setEditAnnouncementMessage(e.target.value)
+                      }
+                      placeholder="Enter announcement message"
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditAnnouncementOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleEditAnnouncement}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Save Changes
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
         </div>
