@@ -725,7 +725,10 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                     {films.map((film) => (
-                      <tr key={film.id} className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                      <tr
+                        key={film.id}
+                        className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                      >
                         <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
                           {film.title}
                         </td>
@@ -823,7 +826,10 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                       {upcomingFilms.map((film) => (
-                        <tr key={film.id} className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                        <tr
+                          key={film.id}
+                          className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                        >
                           <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
                             {film.title}
                           </td>

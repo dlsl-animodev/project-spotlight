@@ -50,7 +50,9 @@ export default function Navbar() {
   useEffect(() => {
     // Check for saved preference or system preference
     const saved = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     const isDark = saved ? saved === "true" : prefersDark;
     setDarkMode(isDark);
     document.documentElement.classList.toggle("dark", isDark);
@@ -90,7 +92,11 @@ export default function Navbar() {
             className="p-2 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             aria-label="Toggle dark mode"
           >
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {darkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
         </nav>
       </div>
@@ -122,7 +128,11 @@ export default function Navbar() {
             className="p-2 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             aria-label="Toggle dark mode"
           >
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {darkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
         </nav>
       </div>

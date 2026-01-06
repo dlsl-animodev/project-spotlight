@@ -119,7 +119,9 @@ export default function FilmGrid() {
                   >
                     <p
                       className={`line-clamp-1 text-xs md:text-sm ${
-                        isHovered ? "text-white/80" : "text-zinc-500 dark:text-zinc-400"
+                        isHovered
+                          ? "text-white/80"
+                          : "text-zinc-500 dark:text-zinc-400"
                       }`}
                     >
                       {film.genre && film.genre.length > 0
