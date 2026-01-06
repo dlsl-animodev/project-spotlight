@@ -10,7 +10,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { Film } from "@/type/film-type";
+import { Film, Announcement } from "@/type/film-type";
 import {
   LayoutDashboard,
   Film as FilmIcon,
@@ -29,6 +29,13 @@ import {
   Globe,
   Monitor,
   RefreshCw,
+  Megaphone,
+  BookOpen,
+  Info,
+  HardDrive,
+  FileVideo,
+  Calendar,
+  Bell,
 } from "lucide-react";
 import UploadFilm from "@/components/upload-film";
 import UploadUpcoming from "@/components/upload-upcoming";
@@ -70,7 +77,8 @@ type ActiveTab =
   | "films"
   | "upload"
   | "upcoming"
-  | "announcements";
+  | "announcements"
+  | "docs";
 
 export default function AdminDashboard() {
   const [allowed, setAllowed] = useState(false);
@@ -86,6 +94,12 @@ export default function AdminDashboard() {
     isNearLimit: boolean;
     isOverLimit: boolean;
   } | null>(null);
+
+  // Announcement state
+  const [currentAnnouncement, setCurrentAnnouncement] =
+    useState<Announcement | null>(null);
+  const [isEditAnnouncementOpen, setIsEditAnnouncementOpen] = useState(false);
+  const [editAnnouncementMessage, setEditAnnouncementMessage] = useState("");
 
   // Dialog states
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -139,12 +153,19 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  // Fetch current announcement
+  const loadCurrentAnnouncement = useCallback(async () => {
+    const announcement = await fetchAnnouncements();
+    setCurrentAnnouncement(announcement);
+  }, []);
+
   useEffect(() => {
     if (allowed) {
       fetchFilms();
       fetchBucketStats();
+      loadCurrentAnnouncement();
     }
-  }, [allowed, fetchFilms]);
+  }, [allowed, fetchFilms, loadCurrentAnnouncement]);
 
   // Fetch bucket stats
   const fetchBucketStats = async () => {
@@ -275,6 +296,59 @@ export default function AdminDashboard() {
       console.error("Error deleting film:", error);
       toast.error("Failed to delete film. Please try again.");
     }
+  };
+
+  // Announcement handlers
+  const handleDeleteAnnouncement = async () => {
+    if (!currentAnnouncement?.id) return;
+    try {
+      await deleteDoc(doc(db, "announcements", currentAnnouncement.id));
+      setCurrentAnnouncement(null);
+      window.dispatchEvent(new CustomEvent("announcementAdded"));
+      toast.success("Announcement deleted successfully");
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      toast.error("Failed to delete announcement");
+    }
+  };
+
+  const handleEditAnnouncement = async () => {
+    if (!currentAnnouncement?.id || !editAnnouncementMessage.trim()) return;
+    try {
+      await updateDoc(doc(db, "announcements", currentAnnouncement.id), {
+        message: editAnnouncementMessage,
+      });
+      setCurrentAnnouncement({
+        ...currentAnnouncement,
+        message: editAnnouncementMessage,
+      });
+      setIsEditAnnouncementOpen(false);
+      window.dispatchEvent(new CustomEvent("announcementAdded"));
+      toast.success("Announcement updated successfully");
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      toast.error("Failed to update announcement");
+    }
+  };
+
+  const getTimeUntilExpiration = (expiresAt: Date) => {
+    const now = new Date();
+    const expiry =
+      expiresAt instanceof Date
+        ? expiresAt
+        : (expiresAt as { toDate?: () => Date })?.toDate?.() ||
+          new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+
+    if (diff <= 0) return "Expired";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) return `${days}d ${hours}h remaining`;
+    if (hours > 0) return `${hours}h ${minutes}m remaining`;
+    return `${minutes}m remaining`;
   };
 
   // Chart data
@@ -420,8 +494,19 @@ export default function AdminDashboard() {
                 : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
-            <LayoutDashboard className="h-5 w-5" />
+            <Megaphone className="h-5 w-5" />
             {sidebarOpen && <span>Announcements</span>}
+          </button>
+          <button
+            onClick={() => setActiveTab("docs")}
+            className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
+              activeTab === "docs"
+                ? "bg-red-600 text-white"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            <BookOpen className="h-5 w-5" />
+            {sidebarOpen && <span>Documentation</span>}
           </button>
         </nav>
 
@@ -473,6 +558,8 @@ export default function AdminDashboard() {
                 ? "Upcoming Films Management"
                 : activeTab === "announcements"
                 ? "Announcements"
+                : activeTab === "docs"
+                ? "Documentation"
                 : "Analytics"}
             </h2>
           </div>
@@ -482,6 +569,23 @@ export default function AdminDashboard() {
         <div className="p-6">
           {activeTab === "dashboard" && (
             <div className="space-y-6">
+              {/* Tab Description */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                      Overview Dashboard
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      View storage usage, total films, upcoming releases, and
+                      analytics at a glance. Monitor your platform&apos;s
+                      performance and resource utilization.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Stats Cards */}
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -707,78 +811,114 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "films" && (
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-600 dark:text-zinc-400">
-                    <tr>
-                      <th className="px-6 py-4 font-medium">Title</th>
-                      <th className="px-6 py-4 font-medium">Director</th>
-                      <th className="px-6 py-4 font-medium">Genre</th>
-                      <th className="px-6 py-4 font-medium">Duration</th>
-                      <th className="px-6 py-4 font-medium">Rating</th>
-                      <th className="px-6 py-4 font-medium">Featured</th>
-                      <th className="px-6 py-4 font-medium text-right">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
-                    {films.map((film) => (
-                      <tr
-                        key={film.id}
-                        className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
-                      >
-                        <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
-                          {film.title}
-                        </td>
-                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
-                          {film.director || "-"}
-                        </td>
-                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
-                          {film.genre?.join(", ") || "-"}
-                        </td>
-                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
-                          {film.duration || "-"} min
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">
-                            {film.rating || "NR"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {film.featured ? (
-                            <Star className="h-5 w-5 fill-red-600 text-red-600" />
-                          ) : (
-                            <Star className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => openEditDialog(film)}
-                              className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => openDeleteDialog(film)}
-                              className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
+            <div className="space-y-6">
+              {/* Tab Description */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                      Films Management
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      View, edit, and delete all released films. You can update
+                      film details, change the featured film, and manage your
+                      film library.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-600 dark:text-zinc-400">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">Title</th>
+                        <th className="px-6 py-4 font-medium">Director</th>
+                        <th className="px-6 py-4 font-medium">Genre</th>
+                        <th className="px-6 py-4 font-medium">Duration</th>
+                        <th className="px-6 py-4 font-medium">Rating</th>
+                        <th className="px-6 py-4 font-medium">Featured</th>
+                        <th className="px-6 py-4 font-medium text-right">
+                          Actions
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
+                      {films.map((film) => (
+                        <tr
+                          key={film.id}
+                          className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                        >
+                          <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
+                            {film.title}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
+                            {film.director || "-"}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
+                            {film.genre?.join(", ") || "-"}
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
+                            {film.duration || "-"} min
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">
+                              {film.rating || "NR"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {film.featured ? (
+                              <Star className="h-5 w-5 fill-red-600 text-red-600" />
+                            ) : (
+                              <Star className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => openEditDialog(film)}
+                                className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => openDeleteDialog(film)}
+                                className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === "upload" && (
             <div className="space-y-6">
+              {/* Tab Description */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                      Upload Content
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      Upload new films with video files, thumbnails, and cover
+                      photos. You can also add upcoming films that don&apos;t
+                      have videos yet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
@@ -808,6 +948,22 @@ export default function AdminDashboard() {
 
           {activeTab === "upcoming" && (
             <div className="space-y-6">
+              {/* Tab Description */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                      Upcoming Films Management
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      Manage films that are coming soon. Edit details or delete
+                      upcoming releases that haven&apos;t been published yet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
@@ -881,16 +1037,330 @@ export default function AdminDashboard() {
 
           {activeTab === "announcements" && (
             <div className="space-y-6">
+              {/* Tab Description */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                      Announcements
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      Create and manage homepage announcements. Set expiration
+                      times to automatically remove outdated messages.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Announcement */}
+              {currentAnnouncement && (
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Megaphone className="h-5 w-5 text-red-600" />
+                        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                          Current Announcement
+                        </h3>
+                      </div>
+                      <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-3">
+                        <p className="text-zinc-900 dark:text-white font-medium">
+                          {currentAnnouncement.message}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                        <span
+                          className={`font-medium ${
+                            getTimeUntilExpiration(
+                              currentAnnouncement.expiresAt
+                            ) === "Expired"
+                              ? "text-red-600"
+                              : "text-zinc-600 dark:text-zinc-300"
+                          }`}
+                        >
+                          {getTimeUntilExpiration(
+                            currentAnnouncement.expiresAt
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditAnnouncementMessage(
+                            currentAnnouncement.message
+                          );
+                          setIsEditAnnouncementOpen(true);
+                        }}
+                        className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={handleDeleteAnnouncement}
+                        className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* No Announcement */}
+              {!currentAnnouncement && (
+                <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800/50 p-8 text-center">
+                  <Megaphone className="h-10 w-10 text-zinc-400 mx-auto mb-3" />
+                  <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+                    No active announcement
+                  </p>
+                  <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
+                    Create one below to display on the homepage
+                  </p>
+                </div>
+              )}
+
+              {/* Add Announcement */}
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                    Add Announcements
+                    Add New Announcement
                   </h3>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Add Announcements to the homepage
+                    Add a new announcement to the homepage
                   </p>
                 </div>
-                <UploadAnnouncements onSuccess={fetchAnnouncements} />
+                <UploadAnnouncements onSuccess={loadCurrentAnnouncement} />
+              </div>
+
+              {/* Edit Announcement Dialog */}
+              <Dialog
+                open={isEditAnnouncementOpen}
+                onOpenChange={setIsEditAnnouncementOpen}
+              >
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-red-600">
+                      Edit Announcement
+                    </DialogTitle>
+                    <DialogDescription>
+                      Update the announcement message below.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <Textarea
+                      value={editAnnouncementMessage}
+                      onChange={(e) =>
+                        setEditAnnouncementMessage(e.target.value)
+                      }
+                      placeholder="Enter announcement message"
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditAnnouncementOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleEditAnnouncement}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Save Changes
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+
+          {activeTab === "docs" && (
+            <div className="space-y-6">
+              {/* Version Info */}
+              <div className="rounded-xl border border-red-200 dark:border-red-800 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-red-600">
+                      Project Spotlight
+                    </h2>
+                    <p className="text-zinc-600 dark:text-zinc-400 mt-1">
+                      Admin Dashboard Documentation
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block rounded-full bg-red-600 px-4 py-1 text-sm font-bold text-white">
+                      v1.0.0
+                    </span>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
+                      by @coconhat_
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Storage Limit Warning */}
+              <div className="rounded-xl border border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <HardDrive className="h-8 w-8 text-yellow-600 shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
+                      Storage Limit: 10 GB
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                      This application uses the free tier of Cloudflare R2
+                      storage, which has a <strong>10 GB limit</strong>. Monitor
+                      your storage usage in the Dashboard tab.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* How to Use */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
+                  <BookOpen className="h-6 w-6 text-red-600" />
+                  How to Use This Application
+                </h3>
+
+                <div className="space-y-6">
+                  {/* Dashboard */}
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <LayoutDashboard className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-white">
+                        Dashboard
+                      </h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        View an overview of your platform including storage
+                        usage, total films, upcoming releases, and analytics
+                        charts. Keep an eye on storage to avoid hitting the 10
+                        GB limit.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Films */}
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <FilmIcon className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-white">
+                        Films Management
+                      </h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        View all released films in a table format. Edit film
+                        details (title, description, actors, etc.), set a film
+                        as featured to highlight it on the homepage, or delete
+                        films you no longer need.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Upcoming */}
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <Calendar className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-white">
+                        Upcoming Films
+                      </h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        Manage films that are coming soon but not yet released.
+                        These appear in the &quot;Coming Soon&quot; section on
+                        the public site. Edit or delete upcoming films as
+                        needed.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Upload */}
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <Upload className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-white">
+                        Upload Film
+                      </h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        Upload new films with video files, thumbnails, and cover
+                        photos. You can also add &quot;upcoming&quot; films
+                        without video files to tease future releases. Supported
+                        formats: MP4, WebM for videos; JPG, PNG, WebP for
+                        images.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Announcements */}
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <Bell className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-white">
+                        Announcements
+                      </h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        Create announcements that appear as a banner on the
+                        homepage. Set an expiration date so announcements
+                        automatically disappear. Only one announcement is shown
+                        at a time (the most recent active one).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tips */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
+                  💡 Tips for Best Results
+                </h3>
+                <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">•</span>
+                    <span>
+                      <strong>Use high-quality thumbnails</strong> (recommended:
+                      400x600px) and cover photos (recommended: 1920x1080px).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">•</span>
+                    <span>
+                      <strong>Feature one film</strong> at a time to highlight
+                      it prominently on the homepage.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">•</span>
+                    <span>
+                      <strong>Delete unused films</strong> to free up storage
+                      space when approaching the 10 GB limit.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">•</span>
+                    <span>
+                      <strong>Set announcement expiry dates</strong> carefully
+                      to avoid stale messages on the homepage.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-sm text-zinc-500 dark:text-zinc-400 pt-4">
+                <p className="mt-1">Project Spotlight v1.0.0</p>
+                <p>Film Society × Animo.dev</p>
               </div>
             </div>
           )}
