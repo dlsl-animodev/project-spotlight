@@ -339,24 +339,24 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors">
       {/* Sidebar (responsive) */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen bg-white border-r border-zinc-200 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 z-40 h-screen bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"} w-64`}
       >
         {/* Logo */}
         <Link
           href="/"
-          className="flex h-16 items-center justify-between border-b border-zinc-200 px-4"
+          className="flex h-16 items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-4"
         >
           {sidebarOpen && (
             <h1 className="text-xl font-bold text-red-600">SPOTLIGHT</h1>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100"
+            className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             {sidebarOpen ? (
               <X className="h-5 w-5" />
@@ -373,7 +373,7 @@ export default function AdminDashboard() {
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "dashboard"
                 ? "bg-red-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <LayoutDashboard className="h-5 w-5" />
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "films"
                 ? "bg-red-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <FilmIcon className="h-5 w-5" />
@@ -395,7 +395,7 @@ export default function AdminDashboard() {
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "upcoming"
                 ? "bg-red-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <Clock className="h-5 w-5" />
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "upload"
                 ? "bg-red-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <Upload className="h-5 w-5" />
@@ -417,7 +417,7 @@ export default function AdminDashboard() {
             className={`mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 transition ${
               activeTab === "announcements"
                 ? "bg-red-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <LayoutDashboard className="h-5 w-5" />
@@ -429,7 +429,7 @@ export default function AdminDashboard() {
         <div className="absolute bottom-4 left-0 right-0 px-3">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-zinc-700 hover:bg-red-50 hover:text-red-600 transition"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-zinc-700 dark:text-zinc-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition"
           >
             <LogOut className="h-5 w-5" />
             {sidebarOpen && <span>Logout</span>}
@@ -452,17 +452,17 @@ export default function AdminDashboard() {
         } ml-0`}
       >
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-zinc-200 bg-white px-4 md:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 md:px-6">
           <div className="flex items-center">
             {/* Mobile menu button */}
             <button
-              className="mr-3 inline-flex items-center justify-center rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 md:hidden"
+              className="mr-3 inline-flex items-center justify-center rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 md:hidden"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h2 className="text-xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
               {activeTab === "dashboard"
                 ? "Dashboard"
                 : activeTab === "films"
@@ -488,10 +488,10 @@ export default function AdminDashboard() {
                 <div
                   className={`rounded-xl border p-6 shadow-sm ${
                     bucketStats?.isOverLimit
-                      ? "border-red-300 bg-red-50"
+                      ? "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
                       : bucketStats?.isNearLimit
-                      ? "border-yellow-300 bg-yellow-50"
-                      : "border-zinc-200 bg-white"
+                      ? "border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
+                      : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -517,23 +517,23 @@ export default function AdminDashboard() {
                           />
                         </div>
                       </div>
-                      <p className="text-sm text-zinc-500 text-center">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
                         Storage Used
                       </p>
-                      <p className="text-2xl font-bold text-zinc-900 text-center">
+                      <p className="text-2xl font-bold text-zinc-900 dark:text-white text-center">
                         {bucketStats
                           ? `${bucketStats.totalSizeGB.toFixed(2)}`
                           : "..."}{" "}
                         GB
                       </p>
-                      <p className="text-xs text-zinc-500 mt-1 text-center">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 text-center">
                         {bucketStats
                           ? `${bucketStats.remainingGB.toFixed(2)}`
                           : "..."}{" "}
                         GB remaining
                       </p>
                       {bucketStats && (
-                        <div className="mt-2 h-2 w-full rounded-full bg-zinc-200">
+                        <div className="mt-2 h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-700">
                           <div
                             className={`h-full rounded-full ${
                               bucketStats.isOverLimit
@@ -554,28 +554,28 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="rounded-full bg-red-100 p-3 mb-3">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
                       <FilmIcon className="h-6 w-6 text-red-600" />
                     </div>
-                    <p className="text-sm text-zinc-500 text-center">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
                       Released Films
                     </p>
-                    <p className="text-3xl font-bold text-zinc-900 text-center">
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white text-center">
                       {films.filter((f) => f.status === "released").length}
                     </p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="rounded-full bg-red-100 p-3 mb-3">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
                       <Clock className="h-6 w-6 text-red-600" />
                     </div>
-                    <p className="text-sm text-zinc-500 text-center">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
                       Upcoming Films
                     </p>
-                    <p className="text-3xl font-bold text-zinc-900 text-center">
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white text-center">
                       {
                         films.filter(
                           (f) =>
@@ -586,15 +586,15 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="rounded-full bg-red-100 p-3 mb-3">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
                       <Star className="h-6 w-6 text-red-600" />
                     </div>
-                    <p className="text-sm text-zinc-500 text-center">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
                       Featured Film
                     </p>
-                    <p className="text-lg font-bold text-zinc-900 text-center truncate max-w-[150px]">
+                    <p className="text-lg font-bold text-zinc-900 dark:text-white text-center truncate max-w-[150px]">
                       {films.find((f) => f.featured)?.title || "None"}
                     </p>
                   </div>
@@ -604,8 +604,8 @@ export default function AdminDashboard() {
               {/* Charts */}
               <div className="grid gap-6 lg:grid-cols-2">
                 {/* Bar Chart - Films by Month */}
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <h3 className="mb-4 text-lg font-semibold text-zinc-900">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                  <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
                     Films Added by Month
                   </h3>
                   <ChartContainer
@@ -626,8 +626,8 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Pie Chart - Films by Genre */}
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <h3 className="mb-4 text-lg font-semibold text-zinc-900">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                  <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
                     Films by Genre
                   </h3>
                   <ChartContainer
@@ -662,13 +662,13 @@ export default function AdminDashboard() {
               </div>
 
               {/* Recent Films */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-4 text-lg font-semibold text-zinc-900">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
                   Recent Films
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
-                    <thead className="border-b border-zinc-200 text-sm text-zinc-500">
+                    <thead className="border-b border-zinc-200 dark:border-zinc-700 text-sm text-zinc-500 dark:text-zinc-400">
                       <tr>
                         <th className="pb-3 font-medium">Title</th>
                         <th className="pb-3 font-medium">Genre</th>
@@ -676,21 +676,21 @@ export default function AdminDashboard() {
                         <th className="pb-3 font-medium">Featured</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                       {films.slice(0, 5).map((film) => (
                         <tr key={film.id} className="text-sm">
-                          <td className="py-3 font-medium text-zinc-900">
+                          <td className="py-3 font-medium text-zinc-900 dark:text-white">
                             {film.title}
                           </td>
-                          <td className="py-3 text-zinc-600">
+                          <td className="py-3 text-zinc-600 dark:text-zinc-400">
                             {film.genre?.join(", ")}
                           </td>
-                          <td className="py-3 text-zinc-600">
+                          <td className="py-3 text-zinc-600 dark:text-zinc-400">
                             {film.duration || "-"} min
                           </td>
                           <td className="py-3">
                             {film.featured ? (
-                              <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600">
+                              <span className="rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">
                                 Featured
                               </span>
                             ) : (
@@ -707,10 +707,10 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "films" && (
-            <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                  <thead className="border-b border-zinc-200 bg-zinc-50 text-sm text-zinc-600">
+                  <thead className="border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-600 dark:text-zinc-400">
                     <tr>
                       <th className="px-6 py-4 font-medium">Title</th>
                       <th className="px-6 py-4 font-medium">Director</th>
@@ -723,23 +723,26 @@ export default function AdminDashboard() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                     {films.map((film) => (
-                      <tr key={film.id} className="text-sm hover:bg-zinc-50">
-                        <td className="px-6 py-4 font-medium text-zinc-900">
+                      <tr
+                        key={film.id}
+                        className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                      >
+                        <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
                           {film.title}
                         </td>
-                        <td className="px-6 py-4 text-zinc-600">
+                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                           {film.director || "-"}
                         </td>
-                        <td className="px-6 py-4 text-zinc-600">
+                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                           {film.genre?.join(", ") || "-"}
                         </td>
-                        <td className="px-6 py-4 text-zinc-600">
+                        <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                           {film.duration || "-"} min
                         </td>
                         <td className="px-6 py-4">
-                          <span className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-600">
+                          <span className="rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">
                             {film.rating || "NR"}
                           </span>
                         </td>
@@ -747,20 +750,20 @@ export default function AdminDashboard() {
                           {film.featured ? (
                             <Star className="h-5 w-5 fill-red-600 text-red-600" />
                           ) : (
-                            <Star className="h-5 w-5 text-zinc-300" />
+                            <Star className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => openEditDialog(film)}
-                              className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100"
+                              className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
                             >
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => openDeleteDialog(film)}
-                              className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                              className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -776,24 +779,24 @@ export default function AdminDashboard() {
 
           {activeTab === "upload" && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-zinc-900">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                     Upload New Film
                   </h3>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Add a new movie by uploading the video and its cover image.
                   </p>
                 </div>
                 <UploadFilm onSuccess={fetchFilms} />
               </div>
               <div className="space-y-6">
-                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-zinc-900">
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                       Add Upcoming Film
                     </h3>
-                    <p className="text-sm text-zinc-500">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       Add an upcoming or coming soon film (no video required).
                     </p>
                   </div>
@@ -805,10 +808,10 @@ export default function AdminDashboard() {
 
           {activeTab === "upcoming" && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
-                    <thead className="border-b border-zinc-200 bg-zinc-50 text-sm text-zinc-600">
+                    <thead className="border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-600 dark:text-zinc-400">
                       <tr>
                         <th className="px-6 py-4 font-medium">Title</th>
                         <th className="px-6 py-4 font-medium">Director</th>
@@ -821,23 +824,26 @@ export default function AdminDashboard() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
                       {upcomingFilms.map((film) => (
-                        <tr key={film.id} className="text-sm hover:bg-zinc-50">
-                          <td className="px-6 py-4 font-medium text-zinc-900">
+                        <tr
+                          key={film.id}
+                          className="text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                        >
+                          <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
                             {film.title}
                           </td>
-                          <td className="px-6 py-4 text-zinc-600">
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                             {film.director || "-"}
                           </td>
-                          <td className="px-6 py-4 text-zinc-600">
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                             {film.genre?.join(", ") || "-"}
                           </td>
-                          <td className="px-6 py-4 text-zinc-600">
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                             {film.duration || "-"} min
                           </td>
                           <td className="px-6 py-4">
-                            <span className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-600">
+                            <span className="rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">
                               {film.rating || "NR"}
                             </span>
                           </td>
@@ -845,20 +851,20 @@ export default function AdminDashboard() {
                             {film.featured ? (
                               <Star className="h-5 w-5 fill-red-600 text-red-600" />
                             ) : (
-                              <Star className="h-5 w-5 text-zinc-300" />
+                              <Star className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                             )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => openEditDialog(film)}
-                                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100"
+                                className="rounded-lg p-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
                               >
                                 <Pencil className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => openDeleteDialog(film)}
-                                className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                                className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -875,12 +881,12 @@ export default function AdminDashboard() {
 
           {activeTab === "announcements" && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-zinc-900">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                     Add Announcements
                   </h3>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Add Announcements to the homepage
                   </p>
                 </div>

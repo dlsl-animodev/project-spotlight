@@ -4,13 +4,12 @@ import { useState } from "react";
 import { useFilm } from "@/context/film-context";
 import ThumbnailImage from "@/components/thumbnail-image";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
 import { Input } from "./ui/input";
 
 export default function FilmGrid() {
   const { films } = useFilm();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [search, setSearch] = useState(false);
+  const [search, setSearch] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   const releasedFilms = films.filter(
@@ -31,51 +30,56 @@ export default function FilmGrid() {
   if (!films || films.length === 0) return null;
 
   return (
-    <section className="relative bg-zinc-100 py-8 md:py-12">
+    <section className="relative bg-zinc-100 dark:bg-zinc-900 py-8 md:py-12 transition-colors">
       {/* Section Header */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-6 flex items-center justify-between md:mb-8">
-          <h2 className="text-xl font-bold text-red-600 md:text-2xl">
-            All Films
-          </h2>
-          {!search && (
-            <Search
-              onClick={() => setSearch(true)}
-              className="cursor-pointer"
-            />
-          )}
-          {search && (
-            <div className="flex items-center gap-2">
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search films or genres..."
-                className="w-40 rounded-md border border-gray-300 px-3 py-1 sm:w-56"
-                autoFocus
-              />
+        <div className="mb-12 md:mb-16">
+          <div className="flex items-center justify-center gap-3">
+            <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white md:text-5xl lg:text-6xl">
+              More from{" "}
+              <span className="text-white bg-red-600">Film Society</span>
+            </h2>
+            {/* {!search && (
               <button
+                onClick={() => setSearch(true)}
+                className="rounded-full p-2 transition-colors hover:bg-zinc-200"
+                aria-label="Search films"
+              >
+                <Search className="h-5 w-5 text-zinc-600 md:h-6 md:w-6" />
+              </button>
+            )} */}
+          </div>
+
+          {search && (
+            <div className="mx-auto mt-6 flex max-w-xl items-center justify-center gap-3">
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search films or genres..."
+                  className="h-11 w-full rounded-full border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-white px-5 text-base shadow-sm transition-shadow focus:border-zinc-400 dark:focus:border-zinc-600 focus:shadow-md focus:outline-none focus:ring-0"
+                  autoFocus
+                />
+              </div>
+              {/* <button
                 onClick={() => {
                   setSearch(false);
                   setSearchQuery("");
                 }}
-                className="rounded-full p-1 hover:bg-zinc-200"
+                className="rounded-full p-2.5 transition-colors hover:bg-zinc-200"
+                aria-label="Close search"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <X className="h-5 w-5 text-zinc-600" />
+              </button> */}
             </div>
           )}
         </div>
       </div>
-      <div>
-        {filmsFiltered.length === 0 && (
-          <p className="text-center text-zinc-600">No films found.</p>
-        )}
-      </div>
 
       {/* Grid Container */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="grid grid-cols-2 gap-3 pt-24 sm:grid-cols-3 md:grid-cols-4 md:gap-4 md:pt-28 lg:grid-cols-5 lg:pt-32">
+        <div className="grid grid-cols-2 gap-3 pt-20 sm:grid-cols-3 md:grid-cols-4 md:gap-4 md:pt-22 lg:grid-cols-5 lg:pt-24">
           {filmsFiltered.map((film, i) => {
             const isHovered = i === hoveredIndex;
 
@@ -110,12 +114,14 @@ export default function FilmGrid() {
                     className={`p-3 transition-colors duration-300 md:p-4 ${
                       isHovered
                         ? "bg-red-600 text-white"
-                        : "bg-white text-zinc-900"
+                        : "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
                     }`}
                   >
                     <p
                       className={`line-clamp-1 text-xs md:text-sm ${
-                        isHovered ? "text-white/80" : "text-zinc-500"
+                        isHovered
+                          ? "text-white/80"
+                          : "text-zinc-500 dark:text-zinc-400"
                       }`}
                     >
                       {film.genre && film.genre.length > 0

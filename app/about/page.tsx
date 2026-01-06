@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 transition-colors">
       {/* Main Content */}
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}
@@ -38,7 +38,7 @@ export default function AboutPage() {
         </section>
 
         {/* Main Content Section */}
-        <section className="py-16 md:py-24">
+        <section className="py-16 md:py-24 bg-white dark:bg-zinc-950 transition-colors">
           <div className="mx-auto max-w-4xl px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -46,7 +46,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="prose prose-lg prose-zinc mx-auto"
             >
-              <p className="text-xl leading-relaxed text-zinc-700 md:text-2xl">
+              <p className="text-xl leading-relaxed text-zinc-700 dark:text-zinc-300 md:text-2xl">
                 <span className="font-semibold text-red-600">
                   Project Spotlight
                 </span>{" "}
@@ -57,13 +57,13 @@ export default function AboutPage() {
                 Lasallians.
               </p>
 
-              <p className="mt-6 text-lg leading-relaxed text-zinc-600">
+              <p className="mt-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
                 This website serves as a digital theater where the Film Society
                 can showcase their work, share their stories, and reach more
                 viewers across campus.
               </p>
 
-              <p className="mt-6 text-lg leading-relaxed text-zinc-600">
+              <p className="mt-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
                 The platform is built and designed by Animo.dev members,
                 combining web development skills with the creativity of student
                 filmmakers. Our goal is to make a simple, smooth, and enjoyable
@@ -72,7 +72,7 @@ export default function AboutPage() {
                 community at DLSL.
               </p>
 
-              <p className="mt-6 text-lg font-medium leading-relaxed text-zinc-700">
+              <p className="mt-6 text-lg font-medium leading-relaxed text-zinc-700 dark:text-zinc-300">
                 Project Spotlight aims to celebrate student creativity, make
                 films more accessible, and shine a light on the talent within
                 the university.
@@ -82,13 +82,13 @@ export default function AboutPage() {
         </section>
 
         {/* Features Grid */}
-        <section className="bg-zinc-50 py-16 md:py-24">
+        <section className="bg-zinc-50 dark:bg-zinc-900 py-16 md:py-24 transition-colors">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mb-12 text-center text-3xl font-bold text-zinc-900 md:text-4xl"
+              className="mb-12 text-center text-3xl font-bold text-zinc-900 dark:text-white md:text-4xl"
             >
               What We <span className="text-red-600">Offer</span>
             </motion.h2>
@@ -100,15 +100,15 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-lg"
+                className="group rounded-2xl bg-white dark:bg-zinc-800 p-8 shadow-sm transition hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex rounded-xl bg-red-100 p-3">
+                <div className="mb-4 inline-flex rounded-xl bg-red-100 dark:bg-red-900/30 p-3">
                   <Film className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-zinc-900">
+                <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
                   Digital Theater
                 </h3>
-                <p className="text-zinc-600">
+                <p className="text-zinc-600 dark:text-zinc-400">
                   A dedicated space to watch student-made films anytime,
                   anywhere on campus.
                 </p>
@@ -120,15 +120,15 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-lg"
+                className="group rounded-2xl bg-white dark:bg-zinc-800 p-8 shadow-sm transition hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex rounded-xl bg-red-100 p-3">
+                <div className="mb-4 inline-flex rounded-xl bg-red-100 dark:bg-red-900/30 p-3">
                   <Users className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-zinc-900">
+                <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
                   Community
                 </h3>
-                <p className="text-zinc-600">
+                <p className="text-zinc-600 dark:text-zinc-400">
                   Supporting and growing the filmmaking community at DLSL, one
                   film at a time.
                 </p>
@@ -140,15 +140,15 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-lg"
+                className="group rounded-2xl bg-white dark:bg-zinc-800 p-8 shadow-sm transition hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex rounded-xl bg-red-100 p-3">
+                <div className="mb-4 inline-flex rounded-xl bg-red-100 dark:bg-red-900/30 p-3">
                   <Sparkles className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-zinc-900">
+                <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
                   Accessibility
                 </h3>
-                <p className="text-zinc-600">
+                <p className="text-zinc-600 dark:text-zinc-400">
                   Making student films more accessible to everyone across the
                   university.
                 </p>
@@ -158,13 +158,13 @@ export default function AboutPage() {
         </section>
 
         {/* Collaboration Section */}
-        <section className="py-16 md:py-24">
+        <section className="py-16 md:py-24 bg-white dark:bg-zinc-950 transition-colors">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mb-12 text-center text-3xl font-bold text-zinc-900 md:text-4xl"
+              className="mb-12 text-center text-3xl font-bold text-zinc-900 dark:text-white md:text-4xl"
             >
               A <span className="text-red-600">Collaboration</span>
             </motion.h2>
@@ -220,7 +220,7 @@ export default function AboutPage() {
         </section>
 
         {/* Footer CTA */}
-        <section className="border-t border-zinc-100 py-12">
+        <section className="border-t border-zinc-100 dark:border-zinc-800 py-12 bg-white dark:bg-zinc-950 transition-colors">
           <div className="mx-auto max-w-4xl px-4 text-center md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -228,7 +228,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="flex flex-col items-center gap-4"
             >
-              <p className="text-lg text-zinc-600">
+              <p className="text-lg text-zinc-600 dark:text-zinc-400">
                 made by{" "}
                 <Link
                   href="https://www.facebook.com/profile.php?id=61577729247232"

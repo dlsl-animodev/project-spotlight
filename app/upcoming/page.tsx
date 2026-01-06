@@ -77,7 +77,7 @@ export default function UpcomingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 transition-colors">
       {/* Main Content */}
       <main className="pt-20 md:pt-24">
         {/* Hero Section */}
@@ -111,7 +111,7 @@ export default function UpcomingPage() {
         </section>
 
         {/* Films List */}
-        <section className="py-12 md:py-16">
+        <section className="py-12 md:py-16 bg-white dark:bg-zinc-950 transition-colors">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             {loading ? (
               <div className="flex items-center justify-center py-20">
@@ -123,13 +123,13 @@ export default function UpcomingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="py-20 text-center"
               >
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
                   <Calendar className="h-10 w-10 text-zinc-400" />
                 </div>
-                <h3 className="text-xl font-bold text-zinc-900">
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                   No Upcoming Films Yet
                 </h3>
-                <p className="mt-2 text-zinc-500">
+                <p className="mt-2 text-zinc-500 dark:text-zinc-400">
                   Check back soon for new releases from our filmmakers.
                 </p>
                 <Link
@@ -148,7 +148,7 @@ export default function UpcomingPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group relative overflow-hidden rounded-3xl bg-zinc-50 md:flex"
+                    className="group relative overflow-hidden rounded-3xl bg-zinc-50 dark:bg-zinc-900 md:flex transition-colors"
                   >
                     {/* Cover Image */}
                     <div className="relative aspect-video w-full overflow-hidden md:aspect-auto md:min-h-[300px] md:w-2/5">
@@ -193,12 +193,12 @@ export default function UpcomingPage() {
                           {film.genre?.map((g) => (
                             <span
                               key={g}
-                              className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600"
+                              className="rounded-full bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400"
                             >
                               {g}
                             </span>
                           ))}
-                          <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600">
+                          <span className="rounded-full bg-zinc-200 dark:bg-zinc-700 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-300">
                             {film.status === "coming-soon"
                               ? "Coming Soon"
                               : "Upcoming"}
@@ -206,17 +206,17 @@ export default function UpcomingPage() {
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-2xl font-black text-zinc-900 md:text-3xl">
+                        <h2 className="text-2xl font-black text-zinc-900 dark:text-white md:text-3xl">
                           {film.title}
                         </h2>
 
                         {/* Description */}
-                        <p className="mt-3 line-clamp-3 text-zinc-600">
+                        <p className="mt-3 line-clamp-3 text-zinc-600 dark:text-zinc-400">
                           {film.description}
                         </p>
 
                         {/* Meta Info */}
-                        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-500">
+                        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
                           <span className="flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" />
                             {formatDate(film.releaseDate)}
@@ -241,9 +241,9 @@ export default function UpcomingPage() {
         </section>
 
         {/* Footer */}
-        <section className="border-t border-zinc-100 py-8">
+        <section className="border-t border-zinc-100 dark:border-zinc-800 py-8 bg-white dark:bg-zinc-950 transition-colors">
           <div className="mx-auto max-w-6xl px-4 text-center md:px-6">
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               © {new Date().getFullYear()} Project Spotlight — Animo.dev × Film
               Society
             </p>
