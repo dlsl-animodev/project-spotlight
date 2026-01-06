@@ -126,7 +126,7 @@ export default function UpcomingFilms() {
               {/* Content */}
               <div className="mt-auto space-y-4">
                 {/* Genres */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {main.genre?.map((g) => (
                     <span
                       key={g}
