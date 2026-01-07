@@ -155,17 +155,6 @@ export default function FilmDetailPage() {
             <div className="absolute inset-0 bg-linear-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
             <div className="absolute inset-0 bg-linear-to-r from-zinc-900/80 via-transparent to-zinc-900/40" />
 
-            {/* Back Button */}
-            <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onClick={() => router.push("/")}
-              className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white backdrop-blur-sm transition hover:bg-white/20 md:left-8 md:top-8"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span className="hidden sm:inline">Back</span>
-            </motion.button>
-
             {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
               <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-end md:gap-8">
