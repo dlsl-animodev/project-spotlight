@@ -242,6 +242,7 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
         rating: data.rating,
         featured: data.featured,
         status: "released",
+        viewCount: 0,
         id: "",
         createdAt: new Date().toISOString(),
         // Store the R2 keys for the files

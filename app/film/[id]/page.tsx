@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, increment, updateDoc } from "firebase/firestore";
 import { db } from "@/libs/firebase";
 import { Film } from "@/type/film-type";
 import {
@@ -38,7 +38,12 @@ export default function FilmDetailPage() {
       try {
         const filmDoc = await getDoc(doc(db, "films", params.id as string));
         if (filmDoc.exists()) {
-          setFilm({ ...filmDoc.data(), id: filmDoc.id } as Film);
+          const filmData = filmDoc.data() as Film & { viewCounts?: number };
+          setFilm({
+            ...filmData,
+            id: filmDoc.id,
+            viewCount: filmData.viewCount ?? filmData.viewCounts ?? 0,
+          } as Film);
         }
       } catch (error) {
         console.error("Error fetching film:", error);
@@ -238,7 +243,17 @@ export default function FilmDetailPage() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
-                    onClick={() => setIsPlaying(true)}
+                    onClick={async () => {
+                      setIsPlaying(true);
+                      if (!film?.id) return;
+                      try {
+                        await updateDoc(doc(db, "films", film.id), {
+                          viewCount: increment(1),
+                        });
+                      } catch (error) {
+                        console.error("Failed to increment view count", error);
+                      }
+                    }}
                     className="mt-6 flex items-center gap-3 rounded-xl bg-red-600 px-8 py-4 text-lg font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700 hover:shadow-red-600/50"
                   >
                     <Play className="h-6 w-6 fill-white" />

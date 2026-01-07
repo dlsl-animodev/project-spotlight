@@ -4,7 +4,6 @@ import FeaturedFilm from "@/components/featured-film";
 import FilmGrid from "@/components/film-grid";
 import VideoModal from "@/components/video-modal";
 import UpcomingFilms from "@/components/upcoming-films";
-import Navbar from "@/components/navbar";
 
 export default function Home() {
   return (
