@@ -813,6 +813,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 font-medium">Title</th>
                         <th className="pb-3 font-medium">Genre</th>
                         <th className="pb-3 font-medium">Duration</th>
+                        <th className="pb-3 font-medium">Views</th>
                         <th className="pb-3 font-medium">Featured</th>
                       </tr>
                     </thead>
@@ -827,6 +828,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 text-zinc-600 dark:text-zinc-400">
                             {film.duration || "-"} min
+                          </td>
+                          <td className="py-3 text-zinc-600 dark:text-zinc-400">
+                            {(film.viewCount || 0).toLocaleString()}
                           </td>
                           <td className="py-3">
                             {film.featured ? (
