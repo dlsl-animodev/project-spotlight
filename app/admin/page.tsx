@@ -728,7 +728,9 @@ export default function AdminDashboard() {
                     <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
                       <TrendingUp className="h-6 w-6 text-red-600" />
                     </div>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Top Film</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      Top Film
+                    </p>
                     <p className="text-lg font-bold text-zinc-900 dark:text-white truncate max-w-[180px]">
                       {topViewedFilm?.title || "No data"}
                     </p>
