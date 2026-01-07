@@ -232,16 +232,14 @@ export default function FilmDetailPage() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
-                    onClick={async () => {
+                    onClick={() => {
                       setIsPlaying(true);
                       if (!film?.id) return;
-                      try {
-                        await updateDoc(doc(db, "films", film.id), {
-                          viewCount: increment(1),
-                        });
-                      } catch (error) {
-                        console.error("Failed to increment view count", error);
-                      }
+                      updateDoc(doc(db, "films", film.id), {
+                        viewCount: increment(1),
+                      }).catch((err) => {
+                        console.error("Failed to increment view count", err);
+                      });
                     }}
                     className="mt-6 flex items-center gap-3 rounded-xl bg-red-600 px-8 py-4 text-lg font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700 hover:shadow-red-600/50"
                   >
