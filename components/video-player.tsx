@@ -55,6 +55,13 @@ export default function VideoPlayer({
   const [currentSrc, setCurrentSrc] = useState(src);
   const maxRetries = 3;
 
+  // Sync currentSrc with src prop when it changes (fixes stale URL bug)
+  useEffect(() => {
+    setCurrentSrc(src);
+    setRetryCount(0);
+    setHasError(false);
+  }, [src]);
+
   // Format time as MM:SS or HH:MM:SS
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return "0:00";

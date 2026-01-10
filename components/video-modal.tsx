@@ -1,7 +1,7 @@
 "use client";
 
 import { useFilm } from "@/context/film-context";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { RefreshCw, AlertCircle } from "lucide-react";
 
 export default function VideoModal() {
@@ -9,6 +9,14 @@ export default function VideoModal() {
   const [hasError, setHasError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(videoUrl);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Sync currentSrc with videoUrl when it changes (fixes stale URL bug)
+  useEffect(() => {
+    if (videoUrl) {
+      setCurrentSrc(videoUrl);
+      setHasError(false); // Reset error state for new video
+    }
+  }, [videoUrl]);
 
   // Refresh signed URL on error
   const handleRetry = useCallback(async () => {
