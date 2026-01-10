@@ -52,8 +52,22 @@ export function FilmProvider({ children }: { children: React.ReactNode }) {
   // Handle film selection and video fetch
   const handleSelect = async (film: Film) => {
     setSelectedFilm(film);
-    // Use streaming API instead of signed URLs - never expires!
-    setVideoUrl(`/api/stream?key=${encodeURIComponent(film.key)}`);
+    // Fetch signed URL for faster direct streaming from R2
+    try {
+      const res = await fetch(
+        `/api/signed-url?key=${encodeURIComponent(film.key)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setVideoUrl(data.url);
+      } else {
+        // Fallback to streaming API
+        setVideoUrl(`/api/stream?key=${encodeURIComponent(film.key)}`);
+      }
+    } catch (err) {
+      console.error("Failed to get signed URL, using streaming API:", err);
+      setVideoUrl(`/api/stream?key=${encodeURIComponent(film.key)}`);
+    }
   };
 
   // modal stuff

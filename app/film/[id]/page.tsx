@@ -83,9 +83,16 @@ export default function FilmDetailPage() {
           }
         }
 
-        // Use streaming API for video - never expires!
+        // Use signed URL for video (faster, direct from R2)
+        // The VideoPlayer component handles refresh on error
         if (film.key) {
-          setVideoUrl(`/api/stream?key=${encodeURIComponent(film.key)}`);
+          const videoRes = await fetch(
+            `/api/signed-url?key=${encodeURIComponent(film.key)}`
+          );
+          if (videoRes.ok) {
+            const data = await videoRes.json();
+            setVideoUrl(data.url);
+          }
         }
       } catch (error) {
         console.error("Error fetching URLs:", error);
@@ -131,6 +138,7 @@ export default function FilmDetailPage() {
             title={film.title}
             onBack={() => setIsPlaying(false)}
             poster={thumbnailUrl || undefined}
+            videoKey={film.key}
           />
         </motion.div>
       ) : (

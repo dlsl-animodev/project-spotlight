@@ -23,6 +23,7 @@ interface VideoPlayerProps {
   title: string;
   onBack: () => void;
   poster?: string;
+  videoKey?: string; // R2 key for refreshing signed URL on error
 }
 
 export default function VideoPlayer({
@@ -30,6 +31,7 @@ export default function VideoPlayer({
   title,
   onBack,
   poster,
+  videoKey,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +52,7 @@ export default function VideoPlayer({
   const [hoverPosition, setHoverPosition] = useState(0);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [currentSrc, setCurrentSrc] = useState(src);
   const maxRetries = 3;
 
   // Format time as MM:SS or HH:MM:SS
@@ -67,40 +70,81 @@ export default function VideoPlayer({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Handle video error - retry loading
-  const handleVideoError = useCallback(() => {
+  // Refresh signed URL from the server
+  const refreshSignedUrl = useCallback(async (): Promise<string | null> => {
+    if (!videoKey) return null;
+    try {
+      const res = await fetch(
+        `/api/signed-url?key=${encodeURIComponent(videoKey)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        return data.url;
+      }
+    } catch (err) {
+      console.error("Failed to refresh signed URL:", err);
+    }
+    return null;
+  }, [videoKey]);
+
+  // Handle video error - refresh URL and retry
+  const handleVideoError = useCallback(async () => {
     console.error("Video error occurred, retry count:", retryCount);
     if (retryCount < maxRetries) {
       setIsLoading(true);
       setHasError(false);
-      // Add a cache-busting parameter to force reload
-      setTimeout(() => {
-        if (videoRef.current) {
-          const currentSrc = videoRef.current.src;
-          const separator = currentSrc.includes("?") ? "&" : "?";
-          videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
-          videoRef.current.load();
-          setRetryCount((prev) => prev + 1);
+
+      // Wait with exponential backoff
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1000 * (retryCount + 1))
+      );
+
+      // Try to get a fresh signed URL if we have the key
+      let newSrc = currentSrc;
+      if (videoKey) {
+        const freshUrl = await refreshSignedUrl();
+        if (freshUrl) {
+          newSrc = freshUrl;
+          setCurrentSrc(freshUrl);
         }
-      }, 1000 * (retryCount + 1)); // Exponential backoff
+      }
+
+      // Retry with fresh or cache-busted URL
+      if (videoRef.current) {
+        const separator = newSrc.includes("?") ? "&" : "?";
+        videoRef.current.src = `${newSrc}${separator}_retry=${Date.now()}`;
+        videoRef.current.load();
+        setRetryCount((prev) => prev + 1);
+      }
     } else {
       setHasError(true);
       setIsLoading(false);
     }
-  }, [retryCount, maxRetries, src]);
+  }, [retryCount, maxRetries, currentSrc, videoKey, refreshSignedUrl]);
 
   // Manual retry button handler
-  const handleManualRetry = useCallback(() => {
+  const handleManualRetry = useCallback(async () => {
     setRetryCount(0);
     setHasError(false);
     setIsLoading(true);
+
+    // Try to get a fresh signed URL
+    let newSrc = currentSrc;
+    if (videoKey) {
+      const freshUrl = await refreshSignedUrl();
+      if (freshUrl) {
+        newSrc = freshUrl;
+        setCurrentSrc(freshUrl);
+      }
+    }
+
     if (videoRef.current) {
-      const separator = src.includes("?") ? "&" : "?";
-      videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
+      const separator = newSrc.includes("?") ? "&" : "?";
+      videoRef.current.src = `${newSrc}${separator}_retry=${Date.now()}`;
       videoRef.current.load();
       videoRef.current.play().catch(() => {});
     }
-  }, [src]);
+  }, [currentSrc, videoKey, refreshSignedUrl]);
 
   // Hide controls after inactivity
   const resetHideControlsTimer = useCallback(() => {
@@ -443,7 +487,7 @@ export default function VideoPlayer({
       {/* Video Element */}
       <video
         ref={videoRef}
-        src={src}
+        src={currentSrc}
         poster={poster}
         className="h-full w-full cursor-pointer object-contain"
         onClick={togglePlay}
