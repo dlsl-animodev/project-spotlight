@@ -21,12 +21,15 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
+    // Add timestamp to make key unique (prevents cache conflicts on re-upload)
+    const timestamp = Date.now();
+
     let thumbnailKey = "";
     let coverphotoKey = "";
 
     // Upload thumbnail if provided
     if (thumbnailFile && thumbnailFile.size > 0) {
-      thumbnailKey = `thumbnail/${sanitizedTitle}`;
+      thumbnailKey = `thumbnail/${sanitizedTitle}-${timestamp}`;
       const thumbnailBytes = await thumbnailFile.arrayBuffer();
       const thumbnailBuffer = Buffer.from(thumbnailBytes);
 
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
 
     // Upload cover photo if provided
     if (coverphotoFile && coverphotoFile.size > 0) {
-      coverphotoKey = `coverphoto/${sanitizedTitle}`;
+      coverphotoKey = `coverphoto/${sanitizedTitle}-${timestamp}`;
       const coverphotoBytes = await coverphotoFile.arrayBuffer();
       const coverphotoBuffer = Buffer.from(coverphotoBytes);
 

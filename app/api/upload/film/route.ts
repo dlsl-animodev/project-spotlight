@@ -17,7 +17,9 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
-    const key = `videos/${sanitizedTitle}`;
+    // Add timestamp to make key unique (prevents cache conflicts on re-upload)
+    const timestamp = Date.now();
+    const key = `videos/${sanitizedTitle}-${timestamp}`;
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
