@@ -74,7 +74,9 @@ export default function VideoPlayer({
   const refreshSignedUrl = useCallback(async (): Promise<string | null> => {
     if (!videoKey) return null;
     try {
-      const res = await fetch(`/api/signed-url?key=${encodeURIComponent(videoKey)}`);
+      const res = await fetch(
+        `/api/signed-url?key=${encodeURIComponent(videoKey)}`
+      );
       if (res.ok) {
         const data = await res.json();
         return data.url;
@@ -91,10 +93,12 @@ export default function VideoPlayer({
     if (retryCount < maxRetries) {
       setIsLoading(true);
       setHasError(false);
-      
+
       // Wait with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
-      
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1000 * (retryCount + 1))
+      );
+
       // Try to get a fresh signed URL if we have the key
       let newSrc = currentSrc;
       if (videoKey) {
@@ -104,7 +108,7 @@ export default function VideoPlayer({
           setCurrentSrc(freshUrl);
         }
       }
-      
+
       // Retry with fresh or cache-busted URL
       if (videoRef.current) {
         const separator = newSrc.includes("?") ? "&" : "?";
@@ -123,7 +127,7 @@ export default function VideoPlayer({
     setRetryCount(0);
     setHasError(false);
     setIsLoading(true);
-    
+
     // Try to get a fresh signed URL
     let newSrc = currentSrc;
     if (videoKey) {
@@ -133,7 +137,7 @@ export default function VideoPlayer({
         setCurrentSrc(freshUrl);
       }
     }
-    
+
     if (videoRef.current) {
       const separator = newSrc.includes("?") ? "&" : "?";
       videoRef.current.src = `${newSrc}${separator}_retry=${Date.now()}`;

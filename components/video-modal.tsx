@@ -13,10 +13,10 @@ export default function VideoModal() {
   // Refresh signed URL on error
   const handleRetry = useCallback(async () => {
     if (!selectedFilm?.key) return;
-    
+
     setIsLoading(true);
     setHasError(false);
-    
+
     try {
       const res = await fetch(
         `/api/signed-url?key=${encodeURIComponent(selectedFilm.key)}`
@@ -44,7 +44,7 @@ export default function VideoModal() {
         >
           ✕
         </button>
-        
+
         {hasError ? (
           <div className="flex flex-col items-center justify-center gap-4 py-20">
             <AlertCircle className="h-16 w-16 text-red-500" />
@@ -54,7 +54,9 @@ export default function VideoModal() {
               disabled={isLoading}
               className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
             >
-              <RefreshCw className={`h-5 w-5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-5 w-5 ${isLoading ? "animate-spin" : ""}`}
+              />
               {isLoading ? "Retrying..." : "Try Again"}
             </button>
           </div>
