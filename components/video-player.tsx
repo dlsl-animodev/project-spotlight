@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   Settings,
   Loader2,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -46,6 +48,9 @@ export default function VideoPlayer({
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   // Format time as MM:SS or HH:MM:SS
   const formatTime = (seconds: number) => {
@@ -61,6 +66,41 @@ export default function VideoPlayer({
     }
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // Handle video error - retry loading
+  const handleVideoError = useCallback(() => {
+    console.error("Video error occurred, retry count:", retryCount);
+    if (retryCount < maxRetries) {
+      setIsLoading(true);
+      setHasError(false);
+      // Add a cache-busting parameter to force reload
+      setTimeout(() => {
+        if (videoRef.current) {
+          const currentSrc = videoRef.current.src;
+          const separator = currentSrc.includes("?") ? "&" : "?";
+          videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
+          videoRef.current.load();
+          setRetryCount((prev) => prev + 1);
+        }
+      }, 1000 * (retryCount + 1)); // Exponential backoff
+    } else {
+      setHasError(true);
+      setIsLoading(false);
+    }
+  }, [retryCount, maxRetries, src]);
+
+  // Manual retry button handler
+  const handleManualRetry = useCallback(() => {
+    setRetryCount(0);
+    setHasError(false);
+    setIsLoading(true);
+    if (videoRef.current) {
+      const separator = src.includes("?") ? "&" : "?";
+      videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [src]);
 
   // Hide controls after inactivity
   const resetHideControlsTimer = useCallback(() => {
@@ -80,6 +120,11 @@ export default function VideoPlayer({
   const handleMouseMove = () => {
     resetHideControlsTimer();
   };
+
+  // Touch handler for mobile - tap to show/hide controls
+  const handleTouchStart = useCallback(() => {
+    resetHideControlsTimer();
+  }, [resetHideControlsTimer]);
 
   // Play/Pause toggle
   const togglePlay = useCallback(() => {
@@ -127,36 +172,55 @@ export default function VideoPlayer({
     if (!video || !container) return;
 
     try {
-      // Check if we're currently in fullscreen
+      // Check if we're currently in fullscreen (including iOS video fullscreen)
       const isCurrentlyFullscreen = !!(
         document.fullscreenElement ||
         (document as any).webkitFullscreenElement ||
         (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
+        (document as any).msFullscreenElement ||
+        (video as any).webkitDisplayingFullscreen
       );
 
       if (!isCurrentlyFullscreen) {
-        // Try to enter fullscreen - prioritize video element for mobile
-        if (video.requestFullscreen) {
-          await video.requestFullscreen();
-        } else if ((video as any).webkitRequestFullscreen) {
-          // Safari desktop
-          await (video as any).webkitRequestFullscreen();
-        } else if ((video as any).webkitEnterFullscreen) {
-          // iOS Safari - this is the key for mobile!
-          await (video as any).webkitEnterFullscreen();
+        // Detect if mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isIOS && (video as any).webkitEnterFullscreen) {
+          // iOS Safari - must use webkitEnterFullscreen on the video element
+          // This is the ONLY way fullscreen works on iOS
+          (video as any).webkitEnterFullscreen();
+        } else if (isIOS && (video as any).webkitSupportsFullscreen) {
+          // Fallback for older iOS
+          (video as any).webkitEnterFullscreen();
+        } else if (isMobile && container.requestFullscreen) {
+          // Android Chrome - use container fullscreen
+          await container.requestFullscreen();
+        } else if (container.requestFullscreen) {
+          // Desktop Chrome/Firefox/Edge
+          await container.requestFullscreen();
         } else if ((container as any).webkitRequestFullscreen) {
+          // Desktop Safari
           await (container as any).webkitRequestFullscreen();
         } else if ((container as any).mozRequestFullScreen) {
+          // Firefox legacy
           await (container as any).mozRequestFullScreen();
         } else if ((container as any).msRequestFullscreen) {
+          // IE/Edge legacy
           await (container as any).msRequestFullscreen();
-        } else if (container.requestFullscreen) {
-          await container.requestFullscreen();
+        } else if ((video as any).webkitEnterFullscreen) {
+          // Final fallback for iOS-like devices
+          (video as any).webkitEnterFullscreen();
         }
       } else {
         // Exit fullscreen
-        if (document.exitFullscreen) {
+        if (
+          (video as any).webkitDisplayingFullscreen &&
+          (video as any).webkitExitFullscreen
+        ) {
+          // iOS Safari - exit video fullscreen
+          (video as any).webkitExitFullscreen();
+        } else if (document.exitFullscreen) {
           await document.exitFullscreen();
         } else if ((document as any).webkitExitFullscreen) {
           await (document as any).webkitExitFullscreen();
@@ -168,6 +232,15 @@ export default function VideoPlayer({
       }
     } catch (err) {
       console.error("Fullscreen error:", err);
+      // If standard fullscreen fails on mobile, try native video fullscreen as last resort
+      const video = videoRef.current;
+      if (video && (video as any).webkitEnterFullscreen) {
+        try {
+          (video as any).webkitEnterFullscreen();
+        } catch (e) {
+          console.error("Native fullscreen also failed:", e);
+        }
+      }
     }
   }, []);
 
@@ -250,9 +323,13 @@ export default function VideoPlayer({
     const onLoadedMetadata = () => {
       setDuration(video.duration);
       setIsLoading(false);
+      setHasError(false);
     };
     const onWaiting = () => setIsLoading(true);
-    const onCanPlay = () => setIsLoading(false);
+    const onCanPlay = () => {
+      setIsLoading(false);
+      setHasError(false);
+    };
     const onProgress = () => {
       if (video.buffered.length > 0) {
         setBuffered(video.buffered.end(video.buffered.length - 1));
@@ -261,6 +338,9 @@ export default function VideoPlayer({
     const onEnded = () => {
       setIsPlaying(false);
       setShowControls(true);
+    };
+    const onError = () => {
+      handleVideoError();
     };
 
     video.addEventListener("play", onPlay);
@@ -271,6 +351,7 @@ export default function VideoPlayer({
     video.addEventListener("canplay", onCanPlay);
     video.addEventListener("progress", onProgress);
     video.addEventListener("ended", onEnded);
+    video.addEventListener("error", onError);
 
     return () => {
       video.removeEventListener("play", onPlay);
@@ -281,8 +362,9 @@ export default function VideoPlayer({
       video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("progress", onProgress);
       video.removeEventListener("ended", onEnded);
+      video.removeEventListener("error", onError);
     };
-  }, []);
+  }, [handleVideoError]);
 
   // Auto-play on mount
   useEffect(() => {
@@ -356,6 +438,7 @@ export default function VideoPlayer({
       className="relative h-full w-full bg-black"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
+      onTouchStart={handleTouchStart}
     >
       {/* Video Element */}
       <video
@@ -367,13 +450,16 @@ export default function VideoPlayer({
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
+        x-webkit-airplay="allow"
         controlsList="nodownload"
         onContextMenu={(e) => e.preventDefault()}
+        // Enable native fullscreen support on iOS
+        onDoubleClick={toggleFullscreen}
       />
 
       {/* Loading Spinner */}
       <AnimatePresence>
-        {isLoading && (
+        {isLoading && !hasError && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -385,9 +471,37 @@ export default function VideoPlayer({
         )}
       </AnimatePresence>
 
+      {/* Error State */}
+      <AnimatePresence>
+        {hasError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80"
+          >
+            <AlertCircle className="h-16 w-16 text-red-500" />
+            <p className="text-lg text-white">Failed to load video</p>
+            <button
+              onClick={handleManualRetry}
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition hover:bg-red-700"
+            >
+              <RefreshCw className="h-5 w-5" />
+              Try Again
+            </button>
+            <button
+              onClick={onBack}
+              className="text-sm text-zinc-400 transition hover:text-white"
+            >
+              Go Back
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Center Play Button (when paused) */}
       <AnimatePresence>
-        {!isPlaying && !isLoading && showControls && (
+        {!isPlaying && !isLoading && !hasError && showControls && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
