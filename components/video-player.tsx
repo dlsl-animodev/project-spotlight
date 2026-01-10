@@ -214,7 +214,10 @@ export default function VideoPlayer({
         }
       } else {
         // Exit fullscreen
-        if ((video as any).webkitDisplayingFullscreen && (video as any).webkitExitFullscreen) {
+        if (
+          (video as any).webkitDisplayingFullscreen &&
+          (video as any).webkitExitFullscreen
+        ) {
           // iOS Safari - exit video fullscreen
           (video as any).webkitExitFullscreen();
         } else if (document.exitFullscreen) {
