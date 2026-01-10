@@ -14,6 +14,7 @@ export type Film = {
   createdAt: string; // When added to your system
   featured?: boolean; // For homepage or featured section
   status?: "released" | "upcoming" | "coming-soon"; // Film status
+  viewCount?: number; // Number of views
 };
 
 export type Announcement = {

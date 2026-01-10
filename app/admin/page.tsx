@@ -84,6 +84,8 @@ export default function AdminDashboard() {
   const [allowed, setAllowed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [films, setFilms] = useState<Film[]>([]);
+  const [totalViews, setTotalViews] = useState(0);
+  const [topViewedFilm, setTopViewedFilm] = useState<Film | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [bucketStats, setBucketStats] = useState<{
@@ -143,11 +145,26 @@ export default function AdminDashboard() {
   const fetchFilms = useCallback(async () => {
     try {
       const response = await getDocs(collection(db, "films"));
-      const filmsData = response.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })) as Film[];
+      const filmsData = response.docs.map((doc) => {
+        const data = doc.data() as Film & { viewCounts?: number };
+        return {
+          ...data,
+          id: doc.id,
+          viewCount: data.viewCount ?? data.viewCounts ?? 0,
+        } as Film;
+      });
       setFilms(filmsData);
+
+      const total = filmsData.reduce(
+        (sum, film) => sum + (film.viewCount || 0),
+        0
+      );
+      setTotalViews(total);
+
+      const sortedByViews = [...filmsData].sort(
+        (a, b) => (b.viewCount || 0) - (a.viewCount || 0)
+      );
+      setTopViewedFilm(sortedByViews[0] || null);
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -588,7 +605,7 @@ export default function AdminDashboard() {
 
               {/* Stats Cards */}
 
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <div
                   className={`rounded-xl border p-6 shadow-sm ${
                     bucketStats?.isOverLimit
@@ -693,13 +710,32 @@ export default function AdminDashboard() {
                 <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                   <div className="flex flex-col items-center justify-center h-full">
                     <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
-                      <Star className="h-6 w-6 text-red-600" />
+                      <Eye className="h-6 w-6 text-red-600" />
                     </div>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
-                      Featured Film
+                      Total Views
                     </p>
-                    <p className="text-lg font-bold text-zinc-900 dark:text-white text-center truncate max-w-[150px]">
-                      {films.find((f) => f.featured)?.title || "None"}
+                    <p className="text-3xl font-bold text-zinc-900 dark:text-white text-center">
+                      {totalViews.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 text-center">
+                      Lifetime across all films
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mb-3">
+                      <TrendingUp className="h-6 w-6 text-red-600" />
+                    </div>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      Top Film
+                    </p>
+                    <p className="text-lg font-bold text-zinc-900 dark:text-white truncate max-w-[180px]">
+                      {topViewedFilm?.title || "No data"}
+                    </p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      {(topViewedFilm?.viewCount || 0).toLocaleString()} views
                     </p>
                   </div>
                 </div>
@@ -777,6 +813,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 font-medium">Title</th>
                         <th className="pb-3 font-medium">Genre</th>
                         <th className="pb-3 font-medium">Duration</th>
+                        <th className="pb-3 font-medium">Views</th>
                         <th className="pb-3 font-medium">Featured</th>
                       </tr>
                     </thead>
@@ -791,6 +828,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 text-zinc-600 dark:text-zinc-400">
                             {film.duration || "-"} min
+                          </td>
+                          <td className="py-3 text-zinc-600 dark:text-zinc-400">
+                            {(film.viewCount || 0).toLocaleString()}
                           </td>
                           <td className="py-3">
                             {film.featured ? (
@@ -838,6 +878,7 @@ export default function AdminDashboard() {
                         <th className="px-6 py-4 font-medium">Director</th>
                         <th className="px-6 py-4 font-medium">Genre</th>
                         <th className="px-6 py-4 font-medium">Duration</th>
+                        <th className="px-6 py-4 font-medium">Views</th>
                         <th className="px-6 py-4 font-medium">Rating</th>
                         <th className="px-6 py-4 font-medium">Featured</th>
                         <th className="px-6 py-4 font-medium text-right">
@@ -862,6 +903,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                             {film.duration || "-"} min
+                          </td>
+                          <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
+                            {(film.viewCount || 0).toLocaleString()}
                           </td>
                           <td className="px-6 py-4">
                             <span className="rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-xs font-medium text-red-600">

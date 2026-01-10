@@ -52,6 +52,10 @@ export default function FeaturedFilm() {
 
   if (!featuredFilm) return null;
 
+  const formattedReleaseDate = featuredFilm.releaseDate.includes("T")
+    ? featuredFilm.releaseDate.split("T")[0]
+    : featuredFilm.releaseDate;
+
   return (
     <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-20 text-center md:h-screen md:py-0">
       {/* Background Image with Overlay - using Next.js Image for optimization */}
@@ -103,7 +107,7 @@ export default function FeaturedFilm() {
               <span className="rounded bg-red-600 px-2 py-1 font-semibold text-white sm:px-3">
                 {featuredFilm.rating || "NR"}
               </span>
-              <span>{featuredFilm.releaseDate}</span>
+              <span>{formattedReleaseDate}</span>
               {featuredFilm.duration && (
                 <span>{featuredFilm.duration} min</span>
               )}

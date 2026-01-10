@@ -31,7 +31,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Upload, Film, CalendarIcon } from "lucide-react";
-import { addDoc } from "firebase/firestore";
+import {
+  addDoc,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { filmsRef } from "@/libs/collections";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -230,6 +237,18 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
             .filter(Boolean)
         : [];
 
+      // If marking as featured, un-feature other films
+      if (data.featured) {
+        const featuredSnap = await getDocs(
+          query(filmsRef, where("featured", "==", true))
+        );
+        await Promise.all(
+          featuredSnap.docs.map((d) =>
+            updateDoc(doc(filmsRef, d.id), { featured: false })
+          )
+        );
+      }
+
       // Add document to Firestore
       await addDoc(filmsRef, {
         title: data.title,
@@ -242,6 +261,7 @@ export default function UploadFilm({ onSuccess }: UploadFilmProps) {
         rating: data.rating,
         featured: data.featured,
         status: "released",
+        viewCount: 0,
         id: "",
         createdAt: new Date().toISOString(),
         // Store the R2 keys for the files
