@@ -55,7 +55,7 @@ export default function FilmDetailPage() {
     fetchFilm();
   }, [params.id]);
 
-  // Fetch signed URLs for images and video
+  // Fetch signed URLs for images (not videos - videos use streaming API)
   useEffect(() => {
     const fetchUrls = async () => {
       if (!film) return;
@@ -83,15 +83,9 @@ export default function FilmDetailPage() {
           }
         }
 
-        // Fetch video URL
+        // Use streaming API for video - never expires!
         if (film.key) {
-          const videoRes = await fetch(
-            `/api/signed-url?key=${encodeURIComponent(film.key)}`
-          );
-          if (videoRes.ok) {
-            const data = await videoRes.json();
-            setVideoUrl(data.url);
-          }
+          setVideoUrl(`/api/stream?key=${encodeURIComponent(film.key)}`);
         }
       } catch (error) {
         console.error("Error fetching URLs:", error);

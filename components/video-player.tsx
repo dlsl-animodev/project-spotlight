@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   Settings,
   Loader2,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -46,6 +48,9 @@ export default function VideoPlayer({
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   // Format time as MM:SS or HH:MM:SS
   const formatTime = (seconds: number) => {
@@ -61,6 +66,41 @@ export default function VideoPlayer({
     }
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // Handle video error - retry loading
+  const handleVideoError = useCallback(() => {
+    console.error("Video error occurred, retry count:", retryCount);
+    if (retryCount < maxRetries) {
+      setIsLoading(true);
+      setHasError(false);
+      // Add a cache-busting parameter to force reload
+      setTimeout(() => {
+        if (videoRef.current) {
+          const currentSrc = videoRef.current.src;
+          const separator = currentSrc.includes("?") ? "&" : "?";
+          videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
+          videoRef.current.load();
+          setRetryCount((prev) => prev + 1);
+        }
+      }, 1000 * (retryCount + 1)); // Exponential backoff
+    } else {
+      setHasError(true);
+      setIsLoading(false);
+    }
+  }, [retryCount, maxRetries, src]);
+
+  // Manual retry button handler
+  const handleManualRetry = useCallback(() => {
+    setRetryCount(0);
+    setHasError(false);
+    setIsLoading(true);
+    if (videoRef.current) {
+      const separator = src.includes("?") ? "&" : "?";
+      videoRef.current.src = `${src}${separator}_retry=${Date.now()}`;
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [src]);
 
   // Hide controls after inactivity
   const resetHideControlsTimer = useCallback(() => {
@@ -250,9 +290,13 @@ export default function VideoPlayer({
     const onLoadedMetadata = () => {
       setDuration(video.duration);
       setIsLoading(false);
+      setHasError(false);
     };
     const onWaiting = () => setIsLoading(true);
-    const onCanPlay = () => setIsLoading(false);
+    const onCanPlay = () => {
+      setIsLoading(false);
+      setHasError(false);
+    };
     const onProgress = () => {
       if (video.buffered.length > 0) {
         setBuffered(video.buffered.end(video.buffered.length - 1));
@@ -261,6 +305,9 @@ export default function VideoPlayer({
     const onEnded = () => {
       setIsPlaying(false);
       setShowControls(true);
+    };
+    const onError = () => {
+      handleVideoError();
     };
 
     video.addEventListener("play", onPlay);
@@ -271,6 +318,7 @@ export default function VideoPlayer({
     video.addEventListener("canplay", onCanPlay);
     video.addEventListener("progress", onProgress);
     video.addEventListener("ended", onEnded);
+    video.addEventListener("error", onError);
 
     return () => {
       video.removeEventListener("play", onPlay);
@@ -281,8 +329,9 @@ export default function VideoPlayer({
       video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("progress", onProgress);
       video.removeEventListener("ended", onEnded);
+      video.removeEventListener("error", onError);
     };
-  }, []);
+  }, [handleVideoError]);
 
   // Auto-play on mount
   useEffect(() => {
@@ -373,7 +422,7 @@ export default function VideoPlayer({
 
       {/* Loading Spinner */}
       <AnimatePresence>
-        {isLoading && (
+        {isLoading && !hasError && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -385,9 +434,37 @@ export default function VideoPlayer({
         )}
       </AnimatePresence>
 
+      {/* Error State */}
+      <AnimatePresence>
+        {hasError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80"
+          >
+            <AlertCircle className="h-16 w-16 text-red-500" />
+            <p className="text-lg text-white">Failed to load video</p>
+            <button
+              onClick={handleManualRetry}
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition hover:bg-red-700"
+            >
+              <RefreshCw className="h-5 w-5" />
+              Try Again
+            </button>
+            <button
+              onClick={onBack}
+              className="text-sm text-zinc-400 transition hover:text-white"
+            >
+              Go Back
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Center Play Button (when paused) */}
       <AnimatePresence>
-        {!isPlaying && !isLoading && showControls && (
+        {!isPlaying && !isLoading && !hasError && showControls && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
