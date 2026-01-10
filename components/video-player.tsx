@@ -121,6 +121,11 @@ export default function VideoPlayer({
     resetHideControlsTimer();
   };
 
+  // Touch handler for mobile - tap to show/hide controls
+  const handleTouchStart = useCallback(() => {
+    resetHideControlsTimer();
+  }, [resetHideControlsTimer]);
+
   // Play/Pause toggle
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
@@ -167,36 +172,52 @@ export default function VideoPlayer({
     if (!video || !container) return;
 
     try {
-      // Check if we're currently in fullscreen
+      // Check if we're currently in fullscreen (including iOS video fullscreen)
       const isCurrentlyFullscreen = !!(
         document.fullscreenElement ||
         (document as any).webkitFullscreenElement ||
         (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
+        (document as any).msFullscreenElement ||
+        (video as any).webkitDisplayingFullscreen
       );
 
       if (!isCurrentlyFullscreen) {
-        // Try to enter fullscreen - prioritize video element for mobile
-        if (video.requestFullscreen) {
-          await video.requestFullscreen();
-        } else if ((video as any).webkitRequestFullscreen) {
-          // Safari desktop
-          await (video as any).webkitRequestFullscreen();
-        } else if ((video as any).webkitEnterFullscreen) {
-          // iOS Safari - this is the key for mobile!
-          await (video as any).webkitEnterFullscreen();
+        // Detect if mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isIOS && (video as any).webkitEnterFullscreen) {
+          // iOS Safari - must use webkitEnterFullscreen on the video element
+          // This is the ONLY way fullscreen works on iOS
+          (video as any).webkitEnterFullscreen();
+        } else if (isIOS && (video as any).webkitSupportsFullscreen) {
+          // Fallback for older iOS
+          (video as any).webkitEnterFullscreen();
+        } else if (isMobile && container.requestFullscreen) {
+          // Android Chrome - use container fullscreen
+          await container.requestFullscreen();
+        } else if (container.requestFullscreen) {
+          // Desktop Chrome/Firefox/Edge
+          await container.requestFullscreen();
         } else if ((container as any).webkitRequestFullscreen) {
+          // Desktop Safari
           await (container as any).webkitRequestFullscreen();
         } else if ((container as any).mozRequestFullScreen) {
+          // Firefox legacy
           await (container as any).mozRequestFullScreen();
         } else if ((container as any).msRequestFullscreen) {
+          // IE/Edge legacy
           await (container as any).msRequestFullscreen();
-        } else if (container.requestFullscreen) {
-          await container.requestFullscreen();
+        } else if ((video as any).webkitEnterFullscreen) {
+          // Final fallback for iOS-like devices
+          (video as any).webkitEnterFullscreen();
         }
       } else {
         // Exit fullscreen
-        if (document.exitFullscreen) {
+        if ((video as any).webkitDisplayingFullscreen && (video as any).webkitExitFullscreen) {
+          // iOS Safari - exit video fullscreen
+          (video as any).webkitExitFullscreen();
+        } else if (document.exitFullscreen) {
           await document.exitFullscreen();
         } else if ((document as any).webkitExitFullscreen) {
           await (document as any).webkitExitFullscreen();
@@ -208,6 +229,15 @@ export default function VideoPlayer({
       }
     } catch (err) {
       console.error("Fullscreen error:", err);
+      // If standard fullscreen fails on mobile, try native video fullscreen as last resort
+      const video = videoRef.current;
+      if (video && (video as any).webkitEnterFullscreen) {
+        try {
+          (video as any).webkitEnterFullscreen();
+        } catch (e) {
+          console.error("Native fullscreen also failed:", e);
+        }
+      }
     }
   }, []);
 
@@ -405,6 +435,7 @@ export default function VideoPlayer({
       className="relative h-full w-full bg-black"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
+      onTouchStart={handleTouchStart}
     >
       {/* Video Element */}
       <video
@@ -416,8 +447,11 @@ export default function VideoPlayer({
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
+        x-webkit-airplay="allow"
         controlsList="nodownload"
         onContextMenu={(e) => e.preventDefault()}
+        // Enable native fullscreen support on iOS
+        onDoubleClick={toggleFullscreen}
       />
 
       {/* Loading Spinner */}
