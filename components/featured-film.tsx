@@ -130,14 +130,15 @@ export default function FeaturedFilm() {
               >
                 {featuredFilm.description}
               </p>
-              {featuredFilm.description && featuredFilm.description.length > 200 && (
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  className="mt-2 text-sm font-semibold text-red-600 hover:text-red-700 hover:underline"
-                >
-                  {expanded ? "Show less" : "Read more"}
-                </button>
-              )}
+              {featuredFilm.description &&
+                featuredFilm.description.length > 200 && (
+                  <button
+                    onClick={() => setExpanded(!expanded)}
+                    className="mt-2 text-sm font-semibold text-red-600 hover:text-red-700 hover:underline"
+                  >
+                    {expanded ? "Show less" : "Read more"}
+                  </button>
+                )}
             </div>
 
             {/* Actors / Director */}
