@@ -14,6 +14,7 @@ export default function FeaturedFilm() {
   const { featuredFilm, loading } = useFilm();
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const fetchBackground = useCallback(async () => {
@@ -27,7 +28,7 @@ export default function FeaturedFilm() {
 
     try {
       const res = await fetch(
-        `/api/signed-url?key=${encodeURIComponent(featuredFilm.coverphotoKey)}`
+        `/api/signed-url?key=${encodeURIComponent(featuredFilm.coverphotoKey)}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -57,7 +58,7 @@ export default function FeaturedFilm() {
     : featuredFilm.releaseDate;
 
   return (
-    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-20 text-center md:h-screen md:py-0">
+    <section className="relative flex min-h-screen w-full flex-col items-center overflow-hidden px-4 pt-24 pb-12 text-center md:pt-28 lg:pt-32">
       {/* Background Image with Overlay - using Next.js Image for optimization */}
       {backgroundUrl && (
         <div className="absolute inset-0">
@@ -82,14 +83,14 @@ export default function FeaturedFilm() {
       )}
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl space-y-4 md:space-y-6">
-        {/* Title - Responsive sizing */}
-        <h2 className="text-3xl font-black text-red-600 sm:text-5xl md:text-6xl lg:text-8xl">
-          {featuredFilm.title.toUpperCase()}
+      <div className="relative z-10 w-full max-w-5xl space-y-6">
+        {/* Title - Smaller and below navbar */}
+        <h2 className="line-clamp-2 text-xl font-black text-red-600 sm:text-2xl md:text-3xl lg:text-4xl">
+          {featuredFilm.title}
         </h2>
 
         {/* 2-Column Grid */}
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 md:gap-12">
+        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
           {/* Left: Thumbnail */}
           <div className="mx-auto aspect-[2/3] w-48 sm:w-56 md:w-full lg:max-w-sm">
             <ThumbnailImage
@@ -121,9 +122,23 @@ export default function FeaturedFilm() {
             )}
 
             {/* Description */}
-            <p className="line-clamp-4 text-sm leading-relaxed text-black sm:text-base md:line-clamp-none md:text-lg">
-              {featuredFilm.description}
-            </p>
+            <div>
+              <p
+                className={`text-sm leading-relaxed text-black sm:text-base md:text-lg ${
+                  expanded ? "" : "line-clamp-4"
+                }`}
+              >
+                {featuredFilm.description}
+              </p>
+              {featuredFilm.description && featuredFilm.description.length > 200 && (
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  className="mt-2 text-sm font-semibold text-red-600 hover:text-red-700 hover:underline"
+                >
+                  {expanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </div>
 
             {/* Actors / Director */}
             <div className="space-y-1 text-zinc-800">
