@@ -64,7 +64,7 @@ export default function FilmDetailPage() {
         // Fetch cover photo URL
         if (film.coverphotoKey) {
           const coverRes = await fetch(
-            `/api/signed-url?key=${encodeURIComponent(film.coverphotoKey)}`
+            `/api/signed-url?key=${encodeURIComponent(film.coverphotoKey)}`,
           );
           if (coverRes.ok) {
             const data = await coverRes.json();
@@ -75,7 +75,7 @@ export default function FilmDetailPage() {
         // Fetch thumbnail URL
         if (film.thumbnailKey) {
           const thumbRes = await fetch(
-            `/api/signed-url?key=${encodeURIComponent(film.thumbnailKey)}`
+            `/api/signed-url?key=${encodeURIComponent(film.thumbnailKey)}`,
           );
           if (thumbRes.ok) {
             const data = await thumbRes.json();
@@ -87,7 +87,7 @@ export default function FilmDetailPage() {
         // The VideoPlayer component handles refresh on error
         if (film.key) {
           const videoRes = await fetch(
-            `/api/signed-url?key=${encodeURIComponent(film.key)}`
+            `/api/signed-url?key=${encodeURIComponent(film.key)}`,
           );
           if (videoRes.ok) {
             const data = await videoRes.json();
