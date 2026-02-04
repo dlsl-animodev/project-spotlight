@@ -82,7 +82,7 @@ export default function VideoPlayer({
     if (!videoKey) return null;
     try {
       const res = await fetch(
-        `/api/signed-url?key=${encodeURIComponent(videoKey)}`
+        `/api/signed-url?key=${encodeURIComponent(videoKey)}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -103,7 +103,7 @@ export default function VideoPlayer({
 
       // Wait with exponential backoff
       await new Promise((resolve) =>
-        setTimeout(resolve, 1000 * (retryCount + 1))
+        setTimeout(resolve, 1000 * (retryCount + 1)),
       );
 
       // Try to get a fresh signed URL if we have the key
@@ -211,7 +211,7 @@ export default function VideoPlayer({
     const newTime = videoRef.current.currentTime + seconds;
     videoRef.current.currentTime = Math.max(
       0,
-      Math.min(videoRef.current.duration || 0, newTime)
+      Math.min(videoRef.current.duration || 0, newTime),
     );
   }, []);
 
@@ -453,10 +453,10 @@ export default function VideoPlayer({
     // iOS Safari specific
     if (video) {
       video.addEventListener("webkitbeginfullscreen", () =>
-        setIsFullscreen(true)
+        setIsFullscreen(true),
       );
       video.addEventListener("webkitendfullscreen", () =>
-        setIsFullscreen(false)
+        setIsFullscreen(false),
       );
     }
 
@@ -464,17 +464,17 @@ export default function VideoPlayer({
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       document.removeEventListener(
         "webkitfullscreenchange",
-        onFullscreenChange
+        onFullscreenChange,
       );
       document.removeEventListener("mozfullscreenchange", onFullscreenChange);
       document.removeEventListener("MSFullscreenChange", onFullscreenChange);
 
       if (video) {
         video.removeEventListener("webkitbeginfullscreen", () =>
-          setIsFullscreen(true)
+          setIsFullscreen(true),
         );
         video.removeEventListener("webkitendfullscreen", () =>
-          setIsFullscreen(false)
+          setIsFullscreen(false),
         );
       }
     };
