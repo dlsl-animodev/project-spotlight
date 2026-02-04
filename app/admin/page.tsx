@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { auth, db } from "@/libs/firebase";
 import { useEffect, useState, useCallback } from "react";
@@ -157,12 +157,12 @@ export default function AdminDashboard() {
 
       const total = filmsData.reduce(
         (sum, film) => sum + (film.viewCount || 0),
-        0
+        0,
       );
       setTotalViews(total);
 
       const sortedByViews = [...filmsData].sort(
-        (a, b) => (b.viewCount || 0) - (a.viewCount || 0)
+        (a, b) => (b.viewCount || 0) - (a.viewCount || 0),
       );
       setTopViewedFilm(sortedByViews[0] || null);
     } catch (error) {
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
       // If marking as featured, un-feature all other films first
       if (formData.featured && !selectedFilm.featured) {
         const currentFeatured = films.filter(
-          (f) => f.featured && f.id !== selectedFilm.id
+          (f) => f.featured && f.id !== selectedFilm.id,
         );
         for (const film of currentFeatured) {
           await updateDoc(doc(db, "films", film.id), { featured: false });
@@ -381,7 +381,7 @@ export default function AdminDashboard() {
       });
       return acc;
     },
-    []
+    [],
   );
 
   const monthlyData = films.reduce(
@@ -399,7 +399,7 @@ export default function AdminDashboard() {
       }
       return acc;
     },
-    []
+    [],
   );
 
   const COLORS = ["#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"];
@@ -568,16 +568,16 @@ export default function AdminDashboard() {
               {activeTab === "dashboard"
                 ? "Dashboard"
                 : activeTab === "films"
-                ? "Films Management"
-                : activeTab === "upload"
-                ? "Upload Film"
-                : activeTab === "upcoming"
-                ? "Upcoming Films Management"
-                : activeTab === "announcements"
-                ? "Announcements"
-                : activeTab === "docs"
-                ? "Documentation"
-                : "Analytics"}
+                  ? "Films Management"
+                  : activeTab === "upload"
+                    ? "Upload Film"
+                    : activeTab === "upcoming"
+                      ? "Upcoming Films Management"
+                      : activeTab === "announcements"
+                        ? "Announcements"
+                        : activeTab === "docs"
+                          ? "Documentation"
+                          : "Analytics"}
             </h2>
           </div>
         </header>
@@ -611,8 +611,8 @@ export default function AdminDashboard() {
                     bucketStats?.isOverLimit
                       ? "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
                       : bucketStats?.isNearLimit
-                      ? "border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
-                      : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                        ? "border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
+                        : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -623,8 +623,8 @@ export default function AdminDashboard() {
                             bucketStats?.isOverLimit
                               ? "bg-red-200"
                               : bucketStats?.isNearLimit
-                              ? "bg-yellow-200"
-                              : "bg-red-100"
+                                ? "bg-yellow-200"
+                                : "bg-red-100"
                           }`}
                         >
                           <BarChart3
@@ -632,8 +632,8 @@ export default function AdminDashboard() {
                               bucketStats?.isOverLimit
                                 ? "text-red-700"
                                 : bucketStats?.isNearLimit
-                                ? "text-yellow-700"
-                                : "text-red-600"
+                                  ? "text-yellow-700"
+                                  : "text-red-600"
                             }`}
                           />
                         </div>
@@ -660,13 +660,13 @@ export default function AdminDashboard() {
                               bucketStats.isOverLimit
                                 ? "bg-red-600"
                                 : bucketStats.isNearLimit
-                                ? "bg-yellow-500"
-                                : "bg-green-500"
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
                             }`}
                             style={{
                               width: `${Math.min(
                                 bucketStats.usagePercentage,
-                                100
+                                100,
                               )}%`,
                             }}
                           />
@@ -701,7 +701,7 @@ export default function AdminDashboard() {
                         films.filter(
                           (f) =>
                             f.status === "upcoming" ||
-                            f.status === "coming-soon"
+                            f.status === "coming-soon",
                         ).length
                       }
                     </p>
@@ -1118,14 +1118,14 @@ export default function AdminDashboard() {
                         <span
                           className={`font-medium ${
                             getTimeUntilExpiration(
-                              currentAnnouncement.expiresAt
+                              currentAnnouncement.expiresAt,
                             ) === "Expired"
                               ? "text-red-600"
                               : "text-zinc-600 dark:text-zinc-300"
                           }`}
                         >
                           {getTimeUntilExpiration(
-                            currentAnnouncement.expiresAt
+                            currentAnnouncement.expiresAt,
                           )}
                         </span>
                       </div>
@@ -1134,7 +1134,7 @@ export default function AdminDashboard() {
                       <button
                         onClick={() => {
                           setEditAnnouncementMessage(
-                            currentAnnouncement.message
+                            currentAnnouncement.message,
                           );
                           setIsEditAnnouncementOpen(true);
                         }}
@@ -1364,6 +1364,58 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* HANDBREAK */}
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
+                  💡 IMPORTANT
+                </h3>
+                <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+                  <li className="flex items-start gap-2">
+                    <span>
+                      If your initial upload is delayed/slow or stuck when
+                      skipping video, most likely your video file is not
+                      optimized for web streaming. Please follow the
+                      instructions below.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">1.</span>
+                    <span>Download HandBrake - https://handbrake.fr/</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">2.</span>
+                    <span>
+                      Open your video in HandBrake (File - Open Source).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">3.</span>
+                    <span>
+                      Make sure Web Optimized is checked (You can find it on the
+                      left side, under Format MP4).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">4.</span>
+                    <span>
+                      Click Start Encode (the green button at the top).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">5.</span>
+                    <span>
+                      Wait for the process to finish - you will see the progress
+                      bar at the bottom.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 font-bold">6.</span>
+                    <span>
+                      Upload the newly generated file in project-spotlight.
+                    </span>
+                  </li>
+                </ul>
+              </div>
               {/* Tips */}
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
@@ -1403,7 +1455,7 @@ export default function AdminDashboard() {
 
               {/* Footer */}
               <div className="text-center text-sm text-zinc-500 dark:text-zinc-400 pt-4">
-                <p className="mt-1">Project Spotlight v1.0.0</p>
+                <p className="mt-1">Project Spotlight v1.1.0</p>
                 <p>Film Society × Animo.dev</p>
               </div>
             </div>
